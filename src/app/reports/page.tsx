@@ -30,7 +30,7 @@ export default function ReportsPage() {
     <PageShell
       eyebrow="Coaching output"
       title="Reports"
-      description="Preview coach-ready pressure-point summaries using the current mock dataset."
+      description="Preview coach-ready summaries using mock match data and comparison anchors from the current elite pressure library."
     >
       <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
         <aside className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -146,10 +146,10 @@ export default function ReportsPage() {
 
           <div className="mt-6 rounded-md bg-slate-50 p-4">
             <h3 className="text-sm font-semibold text-slate-950">
-              Elite comparison anchors
+              Current elite pressure library comparisons
             </h3>
             <p className="mt-2 text-sm leading-6 text-slate-700">
-              {report.eliteComparisons.join(" | ")}
+              Compared with the current elite pressure library, the closest comparison patterns are: {report.eliteComparisons.join(" | ")}. These are coaching references from a limited, curated sample—not claims about what an elite player would always do.
             </p>
           </div>
 
@@ -244,7 +244,7 @@ export default function ReportsPage() {
                     </div>
                     <div>
                       <dt className="font-medium text-slate-500">
-                        Elite comparison anchor
+                        Elite pressure library anchor
                       </dt>
                       <dd className="mt-1 text-slate-900">
                         {point.eliteComparisonAnchor ?? "Not assigned"}

@@ -50,11 +50,34 @@ export type PressurePoint = {
 export type ElitePressurePattern = {
   id: string;
   player: "Federer" | "Nadal" | "Djokovic" | "Alcaraz" | "Sinner";
-  trigger: PressureTrigger;
-  phase: "Serve" | "Return" | "Rally";
-  pattern: string;
-  tacticalTheme: string;
-  coachingApplication: string;
+  opponent: string;
+  match: string;
+  year: number;
+  surface: "Hard" | "Clay" | "Grass" | "Indoor Hard";
+  setScore: string;
+  gameScore: string;
+  pointScore: string;
+  scoreContext: string;
+  pressureTrigger: PressureTrigger;
+  timestamp: string;
+  sourceLabel: string;
+  sourceUrl: string;
+  serveOrReturn: "Serve" | "Return";
+  outcome: "Won" | "Lost";
+  firstServeIn: boolean | null;
+  rallyLength: number;
+  primaryPattern: string;
+  aggressionLevel: "Controlled" | "Balanced" | "High";
+  riskDecision: string;
+  shotThatDecidedPoint: string;
+  errorOrWinnerType: string;
+  resetBehavior: string;
+  bodyLanguageNote: string;
+  tacticalPrinciple: string;
+  coachingTakeaway: string;
+  tags: string[];
+  confidenceLevel: "Low" | "Medium" | "High";
+  notes: string;
 };
 
 export type ReportSummary = {
@@ -240,47 +263,162 @@ export const elitePressurePatterns: ElitePressurePattern[] = [
   {
     id: "elite-1",
     player: "Federer",
-    trigger: "Break Point",
-    phase: "Serve",
-    pattern: "Fast first serve to open the forehand, then immediate court position gain.",
-    tacticalTheme: "Shorten the point with controlled aggression",
-    coachingApplication: "Define a first-serve plus-one target before the point starts.",
+    opponent: "Rafael Nadal",
+    match: "Grand Slam final review sample",
+    year: 2017,
+    surface: "Hard",
+    setScore: "Fifth set",
+    gameScore: "3-3",
+    pointScore: "30-40",
+    scoreContext: "Serving at 3-3 in the deciding set, break point down",
+    pressureTrigger: "Break Point",
+    timestamp: "02:41:18",
+    sourceLabel: "Video source pending verification",
+    sourceUrl: "#",
+    serveOrReturn: "Serve",
+    outcome: "Won",
+    firstServeIn: true,
+    rallyLength: 3,
+    primaryPattern: "Wide first serve followed by an early forehand into open court",
+    aggressionLevel: "Controlled",
+    riskDecision: "Accepted first-strike risk from a rehearsed serve-plus-one pattern",
+    shotThatDecidedPoint: "Forehand to the open court",
+    errorOrWinnerType: "Forced error",
+    resetBehavior: "Turned away from the baseline and reset immediately for the next point",
+    bodyLanguageNote: "Compact routine and neutral posture before serving",
+    tacticalPrinciple: "Use serve location to create a predictable first forehand",
+    coachingTakeaway: "Define the serve and plus-one target before high-pressure service points.",
+    tags: ["break point", "serve plus one", "first strike"],
+    confidenceLevel: "Medium",
+    notes: "Mock review record; match identity and timestamp require source validation.",
   },
   {
     id: "elite-2",
     player: "Nadal",
-    trigger: "Deuce",
-    phase: "Rally",
-    pattern: "Heavy crosscourt forehand height to the backhand before attacking space.",
-    tacticalTheme: "Build pressure through margin and repeatable shape",
-    coachingApplication: "Use height and depth as the first pressure response.",
+    opponent: "Novak Djokovic",
+    match: "Clay final review sample",
+    year: 2020,
+    surface: "Clay",
+    setScore: "First set",
+    gameScore: "4-0",
+    pointScore: "Deuce",
+    scoreContext: "Returning at deuce with an opportunity to extend pressure",
+    pressureTrigger: "Deuce",
+    timestamp: "00:38:42",
+    sourceLabel: "Video source pending verification",
+    sourceUrl: "#",
+    serveOrReturn: "Return",
+    outcome: "Won",
+    firstServeIn: true,
+    rallyLength: 9,
+    primaryPattern: "Heavy crosscourt forehand height before changing direction",
+    aggressionLevel: "Balanced",
+    riskDecision: "Built depth and shape before selecting the line change",
+    shotThatDecidedPoint: "Forehand down the line",
+    errorOrWinnerType: "Clean winner",
+    resetBehavior: "Returned quickly to the receiving position with the same routine",
+    bodyLanguageNote: "High physical intensity without rushing between shots",
+    tacticalPrinciple: "Create pressure with repeatable margin before attacking space",
+    coachingTakeaway: "Under pressure, establish height and depth before changing direction.",
+    tags: ["deuce", "heavy forehand", "margin", "direction change"],
+    confidenceLevel: "Medium",
+    notes: "Mock review record; point sequence must be checked against source footage.",
   },
   {
     id: "elite-3",
     player: "Djokovic",
-    trigger: "Break Point",
-    phase: "Return",
-    pattern: "Deep middle return that removes angle and starts the point neutral.",
-    tacticalTheme: "Deny the server a clean first strike",
-    coachingApplication: "Train a reliable deep-middle return target under scoreboard stress.",
+    opponent: "Roger Federer",
+    match: "Grass final review sample",
+    year: 2019,
+    surface: "Grass",
+    setScore: "Fifth set",
+    gameScore: "7-8",
+    pointScore: "30-40",
+    scoreContext: "Returning on championship point in the deciding set",
+    pressureTrigger: "Match Point",
+    timestamp: "04:47:06",
+    sourceLabel: "Video source pending verification",
+    sourceUrl: "#",
+    serveOrReturn: "Return",
+    outcome: "Won",
+    firstServeIn: true,
+    rallyLength: 4,
+    primaryPattern: "Compact return through the middle followed by stable baseline position",
+    aggressionLevel: "Controlled",
+    riskDecision: "Prioritized return depth and central geometry over an outright return attack",
+    shotThatDecidedPoint: "Backhand passing response",
+    errorOrWinnerType: "Opponent forced error",
+    resetBehavior: "Minimal celebration; immediately restored breathing and position",
+    bodyLanguageNote: "Still head and balanced receiving stance",
+    tacticalPrinciple: "Remove angles and make the server execute an additional ball",
+    coachingTakeaway: "Use a compact deep-middle return target when the cost of a miss is highest.",
+    tags: ["match point", "return", "deep middle", "baseline stability"],
+    confidenceLevel: "High",
+    notes: "Mock structured interpretation based on a known match context; timestamp remains a placeholder.",
   },
   {
     id: "elite-4",
     player: "Alcaraz",
-    trigger: "Tiebreak",
-    phase: "Rally",
-    pattern: "Early forehand acceleration followed by a forward transition when space opens.",
-    tacticalTheme: "Proactive variety without abandoning court position",
-    coachingApplication: "Pair aggressive intent with a defined recovery position.",
+    opponent: "Novak Djokovic",
+    match: "Grand Slam final review sample",
+    year: 2023,
+    surface: "Grass",
+    setScore: "Second set",
+    gameScore: "6-6",
+    pointScore: "4-4",
+    scoreContext: "Level in the second-set tiebreak after losing the opening set",
+    pressureTrigger: "Tiebreak",
+    timestamp: "01:32:24",
+    sourceLabel: "Video source pending verification",
+    sourceUrl: "#",
+    serveOrReturn: "Serve",
+    outcome: "Won",
+    firstServeIn: true,
+    rallyLength: 6,
+    primaryPattern: "Forehand acceleration followed by a committed forward transition",
+    aggressionLevel: "High",
+    riskDecision: "Attacked the first ball that created clear court-position advantage",
+    shotThatDecidedPoint: "Forehand approach",
+    errorOrWinnerType: "Forced passing-shot error",
+    resetBehavior: "Positive fist response, then a deliberate walk to the next position",
+    bodyLanguageNote: "Energetic but organized before initiating the point",
+    tacticalPrinciple: "Aggression is strongest when paired with forward court position",
+    coachingTakeaway: "Link acceleration to a clear transition cue instead of attacking from static position.",
+    tags: ["tiebreak", "forehand", "transition", "proactive"],
+    confidenceLevel: "Medium",
+    notes: "Mock review record; exact score sequence and timestamp require validation.",
   },
   {
     id: "elite-5",
     player: "Sinner",
-    trigger: "30-30",
-    phase: "Rally",
-    pattern: "Clean backhand redirection after absorbing pace through the middle.",
-    tacticalTheme: "Hold the baseline and redirect with low emotional variance",
-    coachingApplication: "Practice calm baseline holds before changing direction.",
+    opponent: "Daniil Medvedev",
+    match: "Grand Slam final review sample",
+    year: 2024,
+    surface: "Hard",
+    setScore: "Fifth set",
+    gameScore: "3-2",
+    pointScore: "30-30",
+    scoreContext: "Returning at 30-30 while leading by a break in the deciding set",
+    pressureTrigger: "30-30",
+    timestamp: "03:31:50",
+    sourceLabel: "Video source pending verification",
+    sourceUrl: "#",
+    serveOrReturn: "Return",
+    outcome: "Won",
+    firstServeIn: false,
+    rallyLength: 8,
+    primaryPattern: "Held the baseline through backhand exchanges before redirecting pace",
+    aggressionLevel: "Balanced",
+    riskDecision: "Waited for a shorter neutral ball before changing direction",
+    shotThatDecidedPoint: "Backhand down the line",
+    errorOrWinnerType: "Forced forehand error",
+    resetBehavior: "No visible reaction beyond turning promptly to the next point",
+    bodyLanguageNote: "Low emotional variance and stable posture",
+    tacticalPrinciple: "Absorb pace without yielding baseline position, then redirect",
+    coachingTakeaway: "Train baseline holds under score pressure before introducing direction changes.",
+    tags: ["30-30", "backhand", "baseline", "redirection"],
+    confidenceLevel: "Medium",
+    notes: "Mock review record; source footage and point metadata have not been verified.",
   },
 ];
 
