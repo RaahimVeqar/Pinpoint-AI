@@ -198,11 +198,49 @@ export default function ReportsPage() {
                   <dl className="mt-4 grid gap-4 text-sm md:grid-cols-2">
                     <div>
                       <dt className="font-medium text-slate-500">
+                        Serve / return
+                      </dt>
+                      <dd className="mt-1 text-slate-900">
+                        {point.server === player?.name
+                          ? "Serving pressure point"
+                          : "Returning pressure point"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-slate-500">
                         Rally length
                       </dt>
                       <dd className="mt-1 text-slate-900">
                         {point.rallyLength} shots
                       </dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-slate-500">
+                        Score context
+                      </dt>
+                      <dd className="mt-1 text-slate-900">
+                        {point.scoreContext}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-slate-500">
+                        Pressure trigger
+                      </dt>
+                      <dd className="mt-1 text-slate-900">{point.trigger}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-slate-500">
+                        Server / returner
+                      </dt>
+                      <dd className="mt-1 text-slate-900">
+                        {point.server} / {point.returner}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-slate-500">
+                        Outcome
+                      </dt>
+                      <dd className="mt-1 text-slate-900">{point.outcome}</dd>
                     </div>
                     <div>
                       <dt className="font-medium text-slate-500">
