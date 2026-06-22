@@ -21,7 +21,7 @@ const collectionTargets = [
 ];
 
 const requiredFields = [
-  "Elite Player", "Opponent", "Match / Tournament", "Year", "Surface", "Set Score",
+  "ID", "Elite Player", "Opponent", "Match / Tournament", "Year", "Surface", "Set Score",
   "Game Score", "Point Score", "Pressure Trigger", "Timestamp", "Source Link",
   "Serve or Return", "Point Outcome", "First Serve In", "Rally Length", "Primary Pattern",
   "Aggression Level", "Risk Decision", "Shot That Decided Point", "Error / Winner Type",
@@ -99,6 +99,11 @@ export default function EliteLibraryPage() {
       <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-xl font-semibold text-slate-950">Real Data Collection Plan</h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">The first verified collection milestone is 20 pressure points. Each point should be reviewed against footage and retain a traceable source before it is used in comparisons.</p>
+        <div className="mt-5 rounded-md border border-emerald-200 bg-emerald-50 p-4">
+          <p className="text-sm font-semibold text-emerald-950">Dataset Template</p>
+          <p className="mt-1 text-sm leading-6 text-emerald-900">Collect real elite points using the CSV schema. The initial target is 20 verified elite pressure points.</p>
+          <p className="mt-2 font-mono text-xs text-emerald-800">data/elite-pressure-points-template.csv</p>
+        </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{collectionTargets.map((item) => { const current = elitePressurePatterns.filter((pattern) => pattern.player === item.player).length; return <div key={item.player} className="rounded-md border border-slate-200 bg-slate-50 p-4"><p className="font-semibold text-slate-950">{item.player}</p><p className="mt-1 text-sm text-slate-600">Target: {item.target} points</p><p className="mt-1 text-xs text-slate-500">Mock records: {current}</p></div>; })}</div>
         <h3 className="mt-6 text-sm font-semibold uppercase tracking-wide text-slate-500">Required fields for every real point</h3>
         <ul className="mt-3 grid gap-x-6 gap-y-2 text-sm text-slate-700 sm:grid-cols-2 lg:grid-cols-3">{requiredFields.map((field) => <li key={field} className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />{field}</li>)}</ul>

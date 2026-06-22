@@ -8,7 +8,7 @@ const navigationItems = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/players", label: "Players" },
   { href: "/matches", label: "Matches" },
-  { href: "/tagging", label: "Tagging" },
+  { href: "/tagging", label: "Clip Analysis" },
   { href: "/reports", label: "Reports" },
   { href: "/elite-library", label: "Elite Library" },
 ];

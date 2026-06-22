@@ -20,6 +20,10 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 Never commit API keys, Supabase credentials, OpenAI keys, or player footage credentials. Use `.env.local` for local secrets and keep `.env.example` placeholder-only.
 
+## Elite Pressure-Point Dataset
+
+Real dataset collection starts outside the app in CSV or Google Sheets. The app currently uses mock data; [`data/elite-pressure-points-template.csv`](data/elite-pressure-points-template.csv) defines the structure for a future import. Do not commit real footage or private credentials to this repository.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
