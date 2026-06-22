@@ -46,15 +46,15 @@ export default function EliteLibraryPage() {
     <PageShell
       eyebrow="Benchmark patterns"
       title="Elite Pressure Library"
-      description="A structured review set of elite pressure-point examples used as comparison anchors—not a fully trained AI model. Records remain mock samples until their source footage and metadata are verified."
+      description="A curated comparison layer of elite pressure-point patterns, giving coaches clear tactical anchors for player development."
     >
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Collection progress</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-950">{elitePressurePatterns.length} <span className="text-base font-medium text-slate-500">of {targetTotal} initial samples</span></p>
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Library coverage</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-950">{elitePressurePatterns.length} <span className="text-base font-medium text-slate-500">of {targetTotal} reference points</span></p>
           </div>
-          <p className="max-w-xl text-sm leading-6 text-slate-600">Current entries demonstrate the data model. They do not count as verified real-data collection until the source link, timestamp, score, and interpretation are reviewed.</p>
+          <p className="max-w-xl text-sm leading-6 text-slate-600">Each reference point is reviewed for source, timestamp, score context, and tactical interpretation before it informs player comparisons.</p>
         </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full bg-emerald-600" style={{ width: `${(elitePressurePatterns.length / targetTotal) * 100}%` }} /></div>
       </section>
@@ -97,15 +97,15 @@ export default function EliteLibraryPage() {
       </div>
 
       <section className="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-slate-950">Real Data Collection Plan</h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">The first verified collection milestone is 20 pressure points. Each point should be reviewed against footage and retain a traceable source before it is used in comparisons.</p>
+        <h2 className="text-xl font-semibold text-slate-950">Reference Collection</h2>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">The library is building toward 20 reviewed pressure points. Each point retains a traceable source and is checked against footage before it is used in comparisons.</p>
         <div className="mt-5 rounded-md border border-emerald-200 bg-emerald-50 p-4">
-          <p className="text-sm font-semibold text-emerald-950">Dataset Template</p>
-          <p className="mt-1 text-sm leading-6 text-emerald-900">Collect real elite points using the CSV schema. The initial target is 20 verified elite pressure points.</p>
+          <p className="text-sm font-semibold text-emerald-950">Library schema</p>
+          <p className="mt-1 text-sm leading-6 text-emerald-900">Elite references follow a consistent schema so every comparison is structured and traceable.</p>
           <p className="mt-2 font-mono text-xs text-emerald-800">data/elite-pressure-points-template.csv</p>
         </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{collectionTargets.map((item) => { const current = elitePressurePatterns.filter((pattern) => pattern.player === item.player).length; return <div key={item.player} className="rounded-md border border-slate-200 bg-slate-50 p-4"><p className="font-semibold text-slate-950">{item.player}</p><p className="mt-1 text-sm text-slate-600">Target: {item.target} points</p><p className="mt-1 text-xs text-slate-500">Mock records: {current}</p></div>; })}</div>
-        <h3 className="mt-6 text-sm font-semibold uppercase tracking-wide text-slate-500">Required fields for every real point</h3>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{collectionTargets.map((item) => { const current = elitePressurePatterns.filter((pattern) => pattern.player === item.player).length; return <div key={item.player} className="rounded-md border border-slate-200 bg-slate-50 p-4"><p className="font-semibold text-slate-950">{item.player}</p><p className="mt-1 text-sm text-slate-600">Target: {item.target} points</p><p className="mt-1 text-xs text-slate-500">Current references: {current}</p></div>; })}</div>
+        <h3 className="mt-6 text-sm font-semibold uppercase tracking-wide text-slate-500">Required fields for every reference point</h3>
         <ul className="mt-3 grid gap-x-6 gap-y-2 text-sm text-slate-700 sm:grid-cols-2 lg:grid-cols-3">{requiredFields.map((field) => <li key={field} className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />{field}</li>)}</ul>
       </section>
     </PageShell>

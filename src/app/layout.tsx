@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Pinpoint AI",
-  description: "Tennis pressure-point analysis for coaches.",
+  description: "Analyzing the moments that decide outcomes through pressure-point insight for coaches.",
 };
 
 export default function RootLayout({

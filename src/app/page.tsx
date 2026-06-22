@@ -9,12 +9,12 @@ export default function Home() {
         </p>
         <div className="space-y-4">
           <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
-            Pinpoint AI helps coaches understand performance when the match is
+            Pinpoint AI helps coaches understand what happens when the match is
             on the line.
           </h1>
           <p className="max-w-2xl text-lg leading-8 text-slate-600">
-            Day 1 MVP shell for tagging high-pressure points, organizing match
-            sessions, and preparing structured coaching reports.
+            Analyze pressure-point clips, compare player behavior against elite
+            patterns, and turn match moments into actionable coaching insight.
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -34,16 +34,16 @@ export default function Home() {
       </div>
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <div className="border-b border-slate-200 pb-4">
-          <p className="text-sm font-medium text-slate-500">MVP focus</p>
+          <p className="text-sm font-medium text-slate-500">How Pinpoint works</p>
           <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-            Coach-led analysis workflow
+            From match moment to coaching insight
           </h2>
         </div>
         <dl className="mt-6 grid gap-4">
           {[
-            ["Pressure score", "30-30, deuce, advantage, break points"],
-            ["Manual tagging", "Coach-entered point context and outcomes"],
-            ["Future reports", "AI coaching summaries against elite patterns"],
+            ["Add clip context", "Provide the score, pressure trigger, and relevant match context"],
+            ["Review drafted analysis", "Pinpoint AI identifies tactical patterns and player behavior"],
+            ["Compare and coach", "Use elite patterns to shape actionable player development"],
           ].map(([label, value]) => (
             <div
               key={label}

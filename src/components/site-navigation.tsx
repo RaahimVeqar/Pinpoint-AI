@@ -16,10 +16,16 @@ const navigationItems = [
 export function SiteNavigation() {
   const pathname = usePathname();
 
+  const taglinePhrases = [
+    "Analyzing the moments that decide outcomes",
+    "Where elite patterns inform player development",
+    "Turning pressure points into coaching insight",
+  ];
+
   return (
     <header className="border-b border-slate-200 bg-white">
       <nav className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" className="flex min-w-0 items-center gap-3">
           <span className="flex h-9 w-9 items-center justify-center rounded-md bg-emerald-700 text-sm font-bold text-white">
             P
           </span>
@@ -27,8 +33,18 @@ export function SiteNavigation() {
             <span className="block text-base font-semibold tracking-tight text-slate-950">
               Pinpoint AI
             </span>
-            <span className="block text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
-              Tennis pressure intelligence
+            <span className="tagline-marquee" aria-label={taglinePhrases[0]}>
+              <span className="tagline-marquee__track" aria-hidden="true">
+                {[0, 1].map((copy) => (
+                  <span className="tagline-marquee__group" key={copy}>
+                    {taglinePhrases.map((phrase) => (
+                      <span className="tagline-marquee__item" key={phrase}>
+                        {phrase}
+                      </span>
+                    ))}
+                  </span>
+                ))}
+              </span>
             </span>
           </span>
         </Link>

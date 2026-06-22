@@ -22,7 +22,7 @@ export default function DashboardPage() {
     <PageShell
       eyebrow="Coach workspace"
       title="Dashboard"
-      description="A simple operating view of roster activity, tagged pressure points, and report readiness."
+      description="Track player activity, review drafted pressure-point analysis, and move coaching insights into reports."
     >
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[

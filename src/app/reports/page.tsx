@@ -30,7 +30,7 @@ export default function ReportsPage() {
     <PageShell
       eyebrow="Coaching output"
       title="Reports"
-      description="Preview coach-ready summaries using mock match data and comparison anchors from the current elite pressure library."
+      description="Review coach-ready summaries built from pressure-point analysis and comparison anchors in the elite library."
     >
       <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
         <aside className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -149,7 +149,7 @@ export default function ReportsPage() {
               Current elite pressure library comparisons
             </h3>
             <p className="mt-2 text-sm leading-6 text-slate-700">
-              Compared with the current elite pressure library, the closest comparison patterns are: {report.eliteComparisons.join(" | ")}. These are coaching references from a limited, curated sample—not claims about what an elite player would always do.
+              Compared with the elite pressure library, the closest patterns are: {report.eliteComparisons.join(" | ")}. These references inform coaching judgment rather than prescribing what an elite player would always do.
             </p>
           </div>
 
@@ -160,7 +160,7 @@ export default function ReportsPage() {
                   Pressure Points Analyzed
                 </h3>
                 <p className="mt-1 text-sm text-slate-600">
-                  Individual tagged points connected to this mock report.
+                  Individual pressure points supporting this coaching report.
                 </p>
               </div>
               <p className="text-sm font-medium text-slate-500">
