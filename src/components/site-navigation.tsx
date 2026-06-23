@@ -9,6 +9,7 @@ const navigationItems = [
   { href: "/players", label: "Players" },
   { href: "/matches", label: "Matches" },
   { href: "/tagging", label: "Clip Analysis" },
+  { href: "/pipeline", label: "AI Pipeline" },
   { href: "/reports", label: "Reports" },
   { href: "/elite-library", label: "Elite Library" },
 ];

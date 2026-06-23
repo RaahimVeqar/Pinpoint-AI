@@ -167,6 +167,19 @@ export default function TaggingPage() {
       description="Provide the clip context. Pinpoint AI drafts the tactical analysis for coach review."
     >
       <div className="space-y-6">
+        <section className="rounded-lg border border-emerald-200 bg-emerald-50 p-5">
+          <h2 className="text-lg font-semibold text-emerald-950">
+            How this will work in the MVP
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-emerald-900">
+            The current output is mock prototype data. In the MVP, Pinpoint AI
+            will analyze the clip, structure the observation into an AI Draft
+            Analysis, compare it with the elite pressure library, and present
+            the draft for coach review. The coach supplies context and approves
+            or edits the draft; the AI drafts the analysis.
+          </p>
+        </section>
+
         <form
           onSubmit={generateDraft}
           className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"

@@ -54,7 +54,7 @@ export default function EliteLibraryPage() {
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Library coverage</p>
             <p className="mt-2 text-3xl font-semibold text-slate-950">{elitePressurePatterns.length} <span className="text-base font-medium text-slate-500">of {targetTotal} reference points</span></p>
           </div>
-          <p className="max-w-xl text-sm leading-6 text-slate-600">Each reference point is reviewed for source, timestamp, score context, and tactical interpretation before it informs player comparisons.</p>
+          <p className="max-w-xl text-sm leading-6 text-slate-600">Each reference point starts from AI-observed elite clips, then is reviewed for source, timestamp, score context, and tactical interpretation before it informs player comparisons. The library is not built from manually invented tactical labels.</p>
         </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full bg-emerald-600" style={{ width: `${(elitePressurePatterns.length / targetTotal) * 100}%` }} /></div>
       </section>
