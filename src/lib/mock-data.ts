@@ -1,11 +1,6 @@
-export type PressureTrigger =
-  | "30-30"
-  | "Deuce"
-  | "Advantage"
-  | "Break Point"
-  | "Set Point"
-  | "Match Point"
-  | "Tiebreak";
+import type { PressureTrigger } from "@/lib/pinpoint-types";
+
+export type { PressureTrigger } from "@/lib/pinpoint-types";
 
 export type Player = {
   id: string;

@@ -22,6 +22,11 @@ const pipelineSteps = [
       "An LLM turns the observation into a draft analysis with fields coaches can review, edit, approve, and reuse.",
   },
   {
+    title: "Elite Dataset Import",
+    description:
+      "AI-observed elite clips are cleaned, standardized, and reviewed as a structured dataset before approved rows enter the comparison library.",
+  },
+  {
     title: "Elite Library Comparison",
     description:
       "The draft is compared against the elite pressure library to surface relevant benchmark patterns and coaching anchors.",

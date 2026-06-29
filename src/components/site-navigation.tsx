@@ -10,6 +10,7 @@ const navigationItems = [
   { href: "/matches", label: "Matches" },
   { href: "/tagging", label: "Clip Analysis" },
   { href: "/pipeline", label: "AI Pipeline" },
+  { href: "/dataset", label: "Dataset" },
   { href: "/reports", label: "Reports" },
   { href: "/elite-library", label: "Elite Library" },
 ];

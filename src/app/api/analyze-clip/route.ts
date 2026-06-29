@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import type { PressureTrigger } from "@/lib/mock-data";
+import type { PressureTrigger } from "@/lib/pinpoint-types";
 
 type AnalyzeClipRequest = {
   playerName?: string;

@@ -3,7 +3,11 @@
 import { FormEvent, useState } from "react";
 
 import { PageShell } from "@/components/page-shell";
-import { matchSessions, players, PressureTrigger } from "@/lib/mock-data";
+import { matchSessions, players } from "@/lib/mock-data";
+import {
+  PRESSURE_TRIGGERS,
+  type PressureTrigger,
+} from "@/lib/pinpoint-types";
 
 type ClipContext = {
   playerId: string;
@@ -34,16 +38,6 @@ type AnalysisDraft = {
   eliteComparison: string;
   analysisNotes: string;
 };
-
-const pressureTriggers: PressureTrigger[] = [
-  "30-30",
-  "Deuce",
-  "Advantage",
-  "Break Point",
-  "Set Point",
-  "Match Point",
-  "Tiebreak",
-];
 
 const analysisLabels: Record<keyof AnalysisDraft, string> = {
   serveOrReturn: "Serve / return",
@@ -306,7 +300,7 @@ export default function TaggingPage() {
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
               >
                 <option value="">Not specified</option>
-                {pressureTriggers.map((trigger) => (
+                {PRESSURE_TRIGGERS.map((trigger) => (
                   <option key={trigger}>{trigger}</option>
                 ))}
               </select>
