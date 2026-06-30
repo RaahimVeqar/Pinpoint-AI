@@ -1,4 +1,7 @@
-import type { PressureTrigger } from "@/lib/pinpoint-types";
+import type {
+  ElitePressurePoint,
+  PressureTrigger,
+} from "@/lib/pinpoint-types";
 
 export type { PressureTrigger } from "@/lib/pinpoint-types";
 
@@ -40,39 +43,6 @@ export type PressurePoint = {
   outcome: "Won" | "Lost";
   coachNote: string;
   eliteComparisonAnchor?: string;
-};
-
-export type ElitePressurePattern = {
-  id: string;
-  player: "Federer" | "Nadal" | "Djokovic" | "Alcaraz" | "Sinner";
-  opponent: string;
-  match: string;
-  year: number;
-  surface: "Hard" | "Clay" | "Grass" | "Indoor Hard";
-  setScore: string;
-  gameScore: string;
-  pointScore: string;
-  scoreContext: string;
-  pressureTrigger: PressureTrigger;
-  timestamp: string;
-  sourceLabel: string;
-  sourceUrl: string;
-  serveOrReturn: "Serve" | "Return";
-  outcome: "Won" | "Lost";
-  firstServeIn: boolean | null;
-  rallyLength: number;
-  primaryPattern: string;
-  aggressionLevel: "Controlled" | "Balanced" | "High";
-  riskDecision: string;
-  shotThatDecidedPoint: string;
-  errorOrWinnerType: string;
-  resetBehavior: string;
-  bodyLanguageNote: string;
-  tacticalPrinciple: string;
-  coachingTakeaway: string;
-  tags: string[];
-  confidenceLevel: "Low" | "Medium" | "High";
-  notes: string;
 };
 
 export type ReportSummary = {
@@ -254,167 +224,77 @@ export const pressurePoints: PressurePoint[] = [
   },
 ];
 
-export const elitePressurePatterns: ElitePressurePattern[] = [
-  {
-    id: "elite-1",
-    player: "Federer",
-    opponent: "Rafael Nadal",
-    match: "Grand Slam final review sample",
-    year: 2017,
-    surface: "Hard",
-    setScore: "Fifth set",
-    gameScore: "3-3",
-    pointScore: "30-40",
-    scoreContext: "Serving at 3-3 in the deciding set, break point down",
-    pressureTrigger: "Break Point",
-    timestamp: "02:41:18",
-    sourceLabel: "Video source pending verification",
-    sourceUrl: "#",
-    serveOrReturn: "Serve",
-    outcome: "Won",
-    firstServeIn: true,
-    rallyLength: 3,
-    primaryPattern: "Wide first serve followed by an early forehand into open court",
+type EliteSampleInput = Pick<
+  ElitePressurePoint,
+  | "id"
+  | "elitePlayer"
+  | "pressureTrigger"
+  | "surface"
+  | "serveOrReturn"
+  | "rallyLength"
+  | "primaryPattern"
+  | "tacticalPrinciple"
+  | "coachingTakeaway"
+  | "tags"
+> &
+  Partial<ElitePressurePoint>;
+
+function eliteSample(input: EliteSampleInput): ElitePressurePoint {
+  return {
+    opponent: "Elite opponent (sample)",
+    matchTournament: "Mock elite match review",
+    year: 2025,
+    setScore: "Deciding set",
+    gameScore: "5-5",
+    pointScore: input.pressureTrigger,
+    timestamp: `00:${input.id.slice(-2).padStart(2, "0")}:00`,
+    sourceLink: "#",
+    clipFileName: `${input.id}-sample.mp4`,
+    playerToAnalyze: input.elitePlayer,
+    serverIfKnown: input.serveOrReturn === "Serve" ? input.elitePlayer : "Opponent",
+    uploaderNote: "Mock/sample row; replace with verified clip metadata.",
+    pointOutcome: "Won",
+    firstServeIn: input.serveOrReturn === "Serve" ? true : null,
     aggressionLevel: "Controlled",
-    riskDecision: "Accepted first-strike risk from a rehearsed serve-plus-one pattern",
-    shotThatDecidedPoint: "Forehand to the open court",
+    riskDecision: "Calculated",
+    shotThatDecidedPoint: "Final pressure ball in the observed sequence",
     errorOrWinnerType: "Forced error",
-    resetBehavior: "Turned away from the baseline and reset immediately for the next point",
-    bodyLanguageNote: "Compact routine and neutral posture before serving",
-    tacticalPrinciple: "Use serve location to create a predictable first forehand",
-    coachingTakeaway: "Define the serve and plus-one target before high-pressure service points.",
-    tags: ["break point", "serve plus one", "first strike"],
-    confidenceLevel: "Medium",
-    notes: "Mock review record; match identity and timestamp require source validation.",
-  },
-  {
-    id: "elite-2",
-    player: "Nadal",
-    opponent: "Novak Djokovic",
-    match: "Clay final review sample",
-    year: 2020,
-    surface: "Clay",
-    setScore: "First set",
-    gameScore: "4-0",
-    pointScore: "Deuce",
-    scoreContext: "Returning at deuce with an opportunity to extend pressure",
-    pressureTrigger: "Deuce",
-    timestamp: "00:38:42",
-    sourceLabel: "Video source pending verification",
-    sourceUrl: "#",
-    serveOrReturn: "Return",
-    outcome: "Won",
-    firstServeIn: true,
-    rallyLength: 9,
-    primaryPattern: "Heavy crosscourt forehand height before changing direction",
-    aggressionLevel: "Balanced",
-    riskDecision: "Built depth and shape before selecting the line change",
-    shotThatDecidedPoint: "Forehand down the line",
-    errorOrWinnerType: "Clean winner",
-    resetBehavior: "Returned quickly to the receiving position with the same routine",
-    bodyLanguageNote: "High physical intensity without rushing between shots",
-    tacticalPrinciple: "Create pressure with repeatable margin before attacking space",
-    coachingTakeaway: "Under pressure, establish height and depth before changing direction.",
-    tags: ["deuce", "heavy forehand", "margin", "direction change"],
-    confidenceLevel: "Medium",
-    notes: "Mock review record; point sequence must be checked against source footage.",
-  },
-  {
-    id: "elite-3",
-    player: "Djokovic",
-    opponent: "Roger Federer",
-    match: "Grass final review sample",
-    year: 2019,
-    surface: "Grass",
-    setScore: "Fifth set",
-    gameScore: "7-8",
-    pointScore: "30-40",
-    scoreContext: "Returning on championship point in the deciding set",
-    pressureTrigger: "Match Point",
-    timestamp: "04:47:06",
-    sourceLabel: "Video source pending verification",
-    sourceUrl: "#",
-    serveOrReturn: "Return",
-    outcome: "Won",
-    firstServeIn: true,
-    rallyLength: 4,
-    primaryPattern: "Compact return through the middle followed by stable baseline position",
-    aggressionLevel: "Controlled",
-    riskDecision: "Prioritized return depth and central geometry over an outright return attack",
-    shotThatDecidedPoint: "Backhand passing response",
-    errorOrWinnerType: "Opponent forced error",
-    resetBehavior: "Minimal celebration; immediately restored breathing and position",
-    bodyLanguageNote: "Still head and balanced receiving stance",
-    tacticalPrinciple: "Remove angles and make the server execute an additional ball",
-    coachingTakeaway: "Use a compact deep-middle return target when the cost of a miss is highest.",
-    tags: ["match point", "return", "deep middle", "baseline stability"],
+    resetBehavior: "Returned to a consistent between-point routine",
+    bodyLanguageNote: "Composed posture in this sample observation",
     confidenceLevel: "High",
-    notes: "Mock structured interpretation based on a known match context; timestamp remains a placeholder.",
-  },
-  {
-    id: "elite-4",
-    player: "Alcaraz",
-    opponent: "Novak Djokovic",
-    match: "Grand Slam final review sample",
-    year: 2023,
-    surface: "Grass",
-    setScore: "Second set",
-    gameScore: "6-6",
-    pointScore: "4-4",
-    scoreContext: "Level in the second-set tiebreak after losing the opening set",
-    pressureTrigger: "Tiebreak",
-    timestamp: "01:32:24",
-    sourceLabel: "Video source pending verification",
-    sourceUrl: "#",
-    serveOrReturn: "Serve",
-    outcome: "Won",
-    firstServeIn: true,
-    rallyLength: 6,
-    primaryPattern: "Forehand acceleration followed by a committed forward transition",
-    aggressionLevel: "High",
-    riskDecision: "Attacked the first ball that created clear court-position advantage",
-    shotThatDecidedPoint: "Forehand approach",
-    errorOrWinnerType: "Forced passing-shot error",
-    resetBehavior: "Positive fist response, then a deliberate walk to the next position",
-    bodyLanguageNote: "Energetic but organized before initiating the point",
-    tacticalPrinciple: "Aggression is strongest when paired with forward court position",
-    coachingTakeaway: "Link acceleration to a clear transition cue instead of attacking from static position.",
-    tags: ["tiebreak", "forehand", "transition", "proactive"],
-    confidenceLevel: "Medium",
-    notes: "Mock review record; exact score sequence and timestamp require validation.",
-  },
-  {
-    id: "elite-5",
-    player: "Sinner",
-    opponent: "Daniil Medvedev",
-    match: "Grand Slam final review sample",
-    year: 2024,
-    surface: "Hard",
-    setScore: "Fifth set",
-    gameScore: "3-2",
-    pointScore: "30-30",
-    scoreContext: "Returning at 30-30 while leading by a break in the deciding set",
-    pressureTrigger: "30-30",
-    timestamp: "03:31:50",
-    sourceLabel: "Video source pending verification",
-    sourceUrl: "#",
-    serveOrReturn: "Return",
-    outcome: "Won",
-    firstServeIn: false,
-    rallyLength: 8,
-    primaryPattern: "Held the baseline through backhand exchanges before redirecting pace",
-    aggressionLevel: "Balanced",
-    riskDecision: "Waited for a shorter neutral ball before changing direction",
-    shotThatDecidedPoint: "Backhand down the line",
-    errorOrWinnerType: "Forced forehand error",
-    resetBehavior: "No visible reaction beyond turning promptly to the next point",
-    bodyLanguageNote: "Low emotional variance and stable posture",
-    tacticalPrinciple: "Absorb pace without yielding baseline position, then redirect",
-    coachingTakeaway: "Train baseline holds under score pressure before introducing direction changes.",
-    tags: ["30-30", "backhand", "baseline", "redirection"],
-    confidenceLevel: "Medium",
-    notes: "Mock review record; source footage and point metadata have not been verified.",
-  },
+    aiNotes: "Mock AI-observed draft used only to demonstrate aggregation.",
+    reviewStatus: "Approved",
+    reviewerCorrection: "Sample human review completed for UI demonstration.",
+    approvedForLibrary: true,
+    ...input,
+  };
+}
+
+export const elitePressurePatterns: ElitePressurePoint[] = [
+  eliteSample({ id: "elite-01", elitePlayer: "Djokovic", pressureTrigger: "Break Point", surface: "Hard", serveOrReturn: "Return", rallyLength: 4, primaryPattern: "Deep-middle return plus one", tacticalPrinciple: "Remove return angles before taking control of the next ball.", coachingTakeaway: "Give the returner a deep-middle target, then recover on balance.", tags: ["return + 1", "deep middle", "first strike"] }),
+  eliteSample({ id: "elite-02", elitePlayer: "Djokovic", pressureTrigger: "Match Point", surface: "Grass", serveOrReturn: "Return", rallyLength: 3, primaryPattern: "Deep-middle return plus one", tacticalPrinciple: "Remove return angles before taking control of the next ball.", coachingTakeaway: "Give the returner a deep-middle target, then recover on balance.", tags: ["return + 1", "compact return", "first strike"] }),
+  eliteSample({ id: "elite-03", elitePlayer: "Djokovic", pressureTrigger: "Break Point", surface: "Hard", serveOrReturn: "Return", rallyLength: 11, primaryPattern: "Elastic defense into neutral reset", tacticalPrinciple: "Defend with depth until court position can be rebuilt.", coachingTakeaway: "Train one high-quality neutral ball after the defensive stretch.", tags: ["defensive reset", "depth", "baseline stability"] }),
+  eliteSample({ id: "elite-04", elitePlayer: "Djokovic", pressureTrigger: "Tiebreak", surface: "Clay", serveOrReturn: "Serve", rallyLength: 14, primaryPattern: "Elastic defense into neutral reset", tacticalPrinciple: "Defend with depth until court position can be rebuilt.", coachingTakeaway: "Train one high-quality neutral ball after the defensive stretch.", tags: ["defensive reset", "rally tolerance", "controlled aggression"], confidenceLevel: "Medium" }),
+
+  eliteSample({ id: "elite-05", elitePlayer: "Nadal", pressureTrigger: "Break Point", surface: "Clay", serveOrReturn: "Serve", rallyLength: 4, primaryPattern: "Heavy serve plus one to the backhand", tacticalPrinciple: "Use shape and height to earn the first forehand advantage.", coachingTakeaway: "Pair the serve target with a high-margin forehand pattern.", tags: ["serve + 1", "heavy forehand", "first strike"] }),
+  eliteSample({ id: "elite-06", elitePlayer: "Nadal", pressureTrigger: "Set Point", surface: "Clay", serveOrReturn: "Serve", rallyLength: 3, primaryPattern: "Heavy serve plus one to the backhand", tacticalPrinciple: "Use shape and height to earn the first forehand advantage.", coachingTakeaway: "Pair the serve target with a high-margin forehand pattern.", tags: ["serve + 1", "forehand shape", "first strike"] }),
+  eliteSample({ id: "elite-07", elitePlayer: "Nadal", pressureTrigger: "Deuce", surface: "Clay", serveOrReturn: "Return", rallyLength: 10, primaryPattern: "Heavy crosscourt pressure before direction change", tacticalPrinciple: "Build repeatable margin before attacking open space.", coachingTakeaway: "Require depth and shape before allowing a line change.", tags: ["margin", "direction change", "controlled aggression"] }),
+  eliteSample({ id: "elite-08", elitePlayer: "Nadal", pressureTrigger: "Break Point", surface: "Hard", serveOrReturn: "Return", rallyLength: 13, primaryPattern: "Heavy crosscourt pressure before direction change", tacticalPrinciple: "Build repeatable margin before attacking open space.", coachingTakeaway: "Require depth and shape before allowing a line change.", tags: ["rally tolerance", "heavy forehand", "controlled aggression"], confidenceLevel: "Medium" }),
+
+  eliteSample({ id: "elite-09", elitePlayer: "Federer", pressureTrigger: "Break Point", surface: "Grass", serveOrReturn: "Serve", rallyLength: 3, primaryPattern: "Wide serve plus one into open court", tacticalPrinciple: "Use serve location to make the first forehand predictable.", coachingTakeaway: "Call the serve and plus-one targets before the pressure point.", tags: ["serve + 1", "first strike", "court opening"] }),
+  eliteSample({ id: "elite-10", elitePlayer: "Federer", pressureTrigger: "Tiebreak", surface: "Hard", serveOrReturn: "Serve", rallyLength: 4, primaryPattern: "Wide serve plus one into open court", tacticalPrinciple: "Use serve location to make the first forehand predictable.", coachingTakeaway: "Call the serve and plus-one targets before the pressure point.", tags: ["serve + 1", "forehand", "first strike"] }),
+  eliteSample({ id: "elite-11", elitePlayer: "Federer", pressureTrigger: "Deuce", surface: "Hard", serveOrReturn: "Return", rallyLength: 8, primaryPattern: "Early baseline position with controlled redirection", tacticalPrinciple: "Hold court position and redirect without adding unnecessary pace.", coachingTakeaway: "Reward early contact when balance and court position are secure.", tags: ["early contact", "redirection", "controlled aggression"] }),
+  eliteSample({ id: "elite-12", elitePlayer: "Federer", pressureTrigger: "Set Point", surface: "Grass", serveOrReturn: "Serve", rallyLength: 9, primaryPattern: "Early baseline position with controlled redirection", tacticalPrinciple: "Hold court position and redirect without adding unnecessary pace.", coachingTakeaway: "Reward early contact when balance and court position are secure.", tags: ["baseline position", "transition", "controlled aggression"], confidenceLevel: "Medium" }),
+
+  eliteSample({ id: "elite-13", elitePlayer: "Alcaraz", pressureTrigger: "Tiebreak", surface: "Grass", serveOrReturn: "Serve", rallyLength: 3, primaryPattern: "Serve plus one full-blitz transition", tacticalPrinciple: "Convert a clear first-ball advantage into forward court position.", coachingTakeaway: "Use a visible short-ball cue to trigger the full forward transition.", tags: ["serve + 1", "full blitz", "first strike"], aggressionLevel: "High" }),
+  eliteSample({ id: "elite-14", elitePlayer: "Alcaraz", pressureTrigger: "Break Point", surface: "Hard", serveOrReturn: "Return", rallyLength: 4, primaryPattern: "Serve plus one full-blitz transition", tacticalPrinciple: "Convert a clear first-ball advantage into forward court position.", coachingTakeaway: "Use a visible short-ball cue to trigger the full forward transition.", tags: ["return + 1", "full blitz", "first strike"], aggressionLevel: "High" }),
+  eliteSample({ id: "elite-15", elitePlayer: "Alcaraz", pressureTrigger: "Tiebreak", surface: "Clay", serveOrReturn: "Return", rallyLength: 9, primaryPattern: "Defensive reset followed by explosive acceleration", tacticalPrinciple: "Reset the point before accelerating from stable balance.", coachingTakeaway: "Separate the neutral reset cue from the later attack cue.", tags: ["defensive reset", "acceleration", "long rally"] }),
+  eliteSample({ id: "elite-16", elitePlayer: "Alcaraz", pressureTrigger: "Match Point", surface: "Hard", serveOrReturn: "Serve", rallyLength: 12, primaryPattern: "Defensive reset followed by explosive acceleration", tacticalPrinciple: "Reset the point before accelerating from stable balance.", coachingTakeaway: "Separate the neutral reset cue from the later attack cue.", tags: ["defensive reset", "full blitz", "long rally"], reviewStatus: "In Review", approvedForLibrary: false, confidenceLevel: "Medium" }),
+
+  eliteSample({ id: "elite-17", elitePlayer: "Sinner", pressureTrigger: "30-30", surface: "Indoor Hard", serveOrReturn: "Return", rallyLength: 4, primaryPattern: "Early return plus one baseline takeover", tacticalPrinciple: "Take time away while preserving balance through the first two balls.", coachingTakeaway: "Train the return and next ball as one connected pressure pattern.", tags: ["return + 1", "early contact", "first strike"] }),
+  eliteSample({ id: "elite-18", elitePlayer: "Sinner", pressureTrigger: "Break Point", surface: "Hard", serveOrReturn: "Serve", rallyLength: 3, primaryPattern: "Early return plus one baseline takeover", tacticalPrinciple: "Take time away while preserving balance through the first two balls.", coachingTakeaway: "Train the return and next ball as one connected pressure pattern.", tags: ["serve + 1", "baseline takeover", "first strike"] }),
+  eliteSample({ id: "elite-19", elitePlayer: "Sinner", pressureTrigger: "30-30", surface: "Hard", serveOrReturn: "Return", rallyLength: 10, primaryPattern: "Baseline hold before pace redirection", tacticalPrinciple: "Absorb pace without yielding baseline position, then redirect.", coachingTakeaway: "Build baseline-hold tolerance before introducing the line change.", tags: ["baseline hold", "redirection", "controlled aggression"] }),
+  eliteSample({ id: "elite-20", elitePlayer: "Sinner", pressureTrigger: "Set Point", surface: "Indoor Hard", serveOrReturn: "Serve", rallyLength: 8, primaryPattern: "Baseline hold before pace redirection", tacticalPrinciple: "Absorb pace without yielding baseline position, then redirect.", coachingTakeaway: "Build baseline-hold tolerance before introducing the line change.", tags: ["baseline hold", "pace absorption", "long rally"], reviewStatus: "In Review", approvedForLibrary: false, confidenceLevel: "Medium" }),
 ];
 
 export const reportSummaries: ReportSummary[] = [
