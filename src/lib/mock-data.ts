@@ -240,6 +240,12 @@ type EliteSampleInput = Pick<
   Partial<ElitePressurePoint>;
 
 function eliteSample(input: EliteSampleInput): ElitePressurePoint {
+  const pointPatternFamily =
+    input.pointPatternFamily ??
+    (typeof input.rallyLength === "number" && input.rallyLength <= 4
+      ? "Early Initiative / First-Strike Dictation"
+      : "Sustained Pressure / Controlled Construction");
+
   return {
     opponent: "Elite opponent (sample)",
     matchTournament: "Mock elite match review",
@@ -266,6 +272,8 @@ function eliteSample(input: EliteSampleInput): ElitePressurePoint {
     reviewStatus: "Approved",
     reviewerCorrection: "Sample human review completed for UI demonstration.",
     approvedForLibrary: true,
+    pointPatternFamily,
+    patternHierarchy: input.patternHierarchy ?? `${pointPatternFamily} → ${input.primaryPattern}`,
     ...input,
   };
 }

@@ -3,6 +3,7 @@ import type {
   ElitePressurePoint,
   ReviewStatus,
 } from "@/lib/pinpoint-types";
+import playerProfiles from "../../data/elite-player-pressure-profiles.json";
 
 export type CountedValue = { label: string; count: number };
 
@@ -20,6 +21,9 @@ export type PlayerPressureSummary = {
   tacticalPrinciples: string[];
   coachingTakeaways: string[];
   tags: string[];
+  patternFamilies: CountedValue[];
+  dominantPatternFamily: string;
+  pressureTendencies: string;
 };
 
 const confidenceRank: Record<ConfidenceLevel, number> = {
@@ -160,6 +164,7 @@ export function getPlayerPressureSummary(
   playerPoints.forEach((point) => {
     reviewStatuses[point.reviewStatus] += 1;
   });
+  const patternFamilies = countValues(evidencePoints, "pointPatternFamily");
 
   return {
     player,
@@ -177,7 +182,33 @@ export function getPlayerPressureSummary(
     tacticalPrinciples: getTacticalPrinciplesForPlayer(points, player),
     coachingTakeaways: getCoachingTakeawaysForPlayer(points, player),
     tags: getTagsForPlayer(points, player),
+    patternFamilies,
+    dominantPatternFamily:
+      patternFamilies.length > 1 && patternFamilies[0].count === patternFamilies[1].count
+        ? "Balanced in current library"
+        : (patternFamilies[0]?.label ?? "No reviewed pattern family"),
+    pressureTendencies: getPressureTendencies(evidencePoints, player),
   };
+}
+
+/** Builds a concise profile from reviewed point-level observations. */
+export function getPressureTendencies(points: ElitePressurePoint[], player: string): string {
+  if (!points.length) return `No reviewed pressure tendencies are available for ${player} in this view.`;
+  const families = countValues(points, "pointPatternFamily");
+  const risks = countValues(points, "riskDecision");
+  const patterns = countValues(points, "primaryPattern");
+  const short = points.filter((point) => point.rallyLength !== null && point.rallyLength <= 4).length;
+  const sustained = points.filter((point) => point.rallyLength !== null && point.rallyLength >= 8).length;
+  const rallyTendency = short > sustained ? "The reviewed sample leans toward short, first-strike points" : sustained > short ? "The reviewed sample leans toward sustained rallies" : "The reviewed sample is balanced between short points and sustained rallies";
+  const family = families.length > 1 && families[0].count === families[1].count ? "a balanced mix of controlled construction and early initiative" : families[0]?.label.toLowerCase() ?? "varied pressure patterns";
+  const behavior = patterns.slice(0, 2).map((item) => item.label.toLowerCase()).join(" and ");
+  const profile = playerProfiles.find((item) => item.elitePlayer.toLowerCase() === player.toLowerCase());
+  const execution = families[0]?.label.startsWith("Early Initiative")
+    ? profile?.earlyInitiativeExecution
+    : profile?.sustainedPressureExecution;
+  const finishingTags = normalizeTags(points.flatMap((point) => point.tags)).filter((tag) => /(finish|net|forward|approach|winner|open court|short ball|volley)/i.test(tag));
+  const finish = finishingTags.length ? `Finishing evidence most often points to ${finishingTags.slice(0, 2).join(" and ")}.` : "Finishing choices follow the opening created rather than forcing an immediate low-percentage strike.";
+  return `${player} most often shows ${family} under pressure, repeatedly using ${behavior || "controlled point construction"}. ${execution ?? "Court position changes when the rally creates a usable opening."} Risk decisions are predominantly ${risks[0]?.label.toLowerCase() ?? "calculated"}; ${rallyTendency.toLowerCase()}. ${finish}`;
 }
 
 function getPreferredPlayerPoints(

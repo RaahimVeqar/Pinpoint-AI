@@ -1,0 +1,57 @@
+[
+  {
+    "elitePlayer": "Novak Djokovic",
+    "approvedPoints": 4,
+    "earlyInitiativeCount": 0,
+    "sustainedPressureCount": 4,
+    "earlyInitiativeShare": 0,
+    "sustainedPressureShare": 1,
+    "dominantFamily": "Sustained Pressure / Controlled Construction",
+    "earlyInitiativeExecution": "No approved short-point examples in the current 20-point library.",
+    "sustainedPressureExecution": "Neutralizes serve pressure, sustains depth and precision, uses safe targets, changes geometry with drop shots, and finishes after the point has been fully constructed."
+  },
+  {
+    "elitePlayer": "Rafael Nadal",
+    "approvedPoints": 4,
+    "earlyInitiativeCount": 2,
+    "sustainedPressureCount": 2,
+    "earlyInitiativeShare": 0.5,
+    "sustainedPressureShare": 0.5,
+    "dominantFamily": "Balanced in current library",
+    "earlyInitiativeExecution": "Uses serve-created openings or return + 2 opportunities to move forward and finish without forcing the first ball.",
+    "sustainedPressureExecution": "Builds with heavy margin, depth, shape, and direction; stretches opponents until the open court or forced error appears."
+  },
+  {
+    "elitePlayer": "Roger Federer",
+    "approvedPoints": 4,
+    "earlyInitiativeCount": 2,
+    "sustainedPressureCount": 2,
+    "earlyInitiativeShare": 0.5,
+    "sustainedPressureShare": 0.5,
+    "dominantFamily": "Balanced in current library",
+    "earlyInitiativeExecution": "Uses the serve to create immediate first-ball control, steps forward quickly, and finishes with a backhand, smash, or other open-court strike.",
+    "sustainedPressureExecution": "Absorbs serve pace, takes time away with early contact, and changes direction only after establishing control."
+  },
+  {
+    "elitePlayer": "Carlos Alcaraz",
+    "approvedPoints": 4,
+    "earlyInitiativeCount": 3,
+    "sustainedPressureCount": 1,
+    "earlyInitiativeShare": 0.75,
+    "sustainedPressureShare": 0.25,
+    "dominantFamily": "Early Initiative / First-Strike Dictation",
+    "earlyInitiativeExecution": "Recognizes serve/return-created openings early, moves inside the court, closes forward, and uses forehand, passing-shot, or drop-volley finishes.",
+    "sustainedPressureExecution": "Can first neutralize a strong serve and extend the exchange before changing court position and finishing at the forecourt."
+  },
+  {
+    "elitePlayer": "Jannik Sinner",
+    "approvedPoints": 4,
+    "earlyInitiativeCount": 0,
+    "sustainedPressureCount": 4,
+    "earlyInitiativeShare": 0,
+    "sustainedPressureShare": 1,
+    "dominantFamily": "Sustained Pressure / Controlled Construction",
+    "earlyInitiativeExecution": "No approved short-point examples in the current 20-point library.",
+    "sustainedPressureExecution": "Uses pace, depth, margin, and stable rally tolerance; waits for the short ball or directional opening, then accelerates or moves forward to finish."
+  }
+]

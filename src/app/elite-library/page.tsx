@@ -8,37 +8,39 @@ import {
   groupElitePointsByPlayer,
   type CountedValue,
 } from "@/lib/dataset-helpers";
-import { elitePressurePatterns } from "@/lib/mock-data";
-import type {
-  ElitePressurePoint,
-  PressureTrigger,
-  Surface,
-} from "@/lib/pinpoint-types";
+import {
+  eliteLibraryPlayers,
+  eliteLibraryPressureTriggers,
+  eliteLibrarySurfaces,
+  elitePressurePoints,
+} from "@/lib/elite-library-data";
+import type { ElitePressurePoint } from "@/lib/pinpoint-types";
 
-const playerOptions = ["All", "Djokovic", "Nadal", "Federer", "Alcaraz", "Sinner"] as const;
-const triggerOptions: Array<"All" | PressureTrigger> = [
-  "All", "30-30", "Deuce", "Advantage", "Break Point", "Set Point", "Match Point", "Tiebreak",
-];
-const surfaceOptions: Array<"All" | Surface> = ["All", "Hard", "Clay", "Grass", "Indoor Hard"];
+const playerOptions = ["All", ...eliteLibraryPlayers];
+const triggerOptions = ["All", ...eliteLibraryPressureTriggers];
+const surfaceOptions = ["All", ...eliteLibrarySurfaces];
 const pointTypeOptions = ["All", "Short point / first strike", "Medium rally", "Long rally"] as const;
-const profileOrder = ["Djokovic", "Nadal", "Federer", "Alcaraz", "Sinner"];
+const profileOrder = eliteLibraryPlayers;
 
-type PlayerFilter = (typeof playerOptions)[number];
+type PlayerFilter = string;
+type TriggerFilter = string;
+type SurfaceFilter = string;
 type PointTypeFilter = (typeof pointTypeOptions)[number];
 
 export default function EliteLibraryPage() {
   const [playerFilter, setPlayerFilter] = useState<PlayerFilter>("All");
-  const [triggerFilter, setTriggerFilter] = useState<"All" | PressureTrigger>("All");
-  const [surfaceFilter, setSurfaceFilter] = useState<"All" | Surface>("All");
+  const [triggerFilter, setTriggerFilter] = useState<TriggerFilter>("All");
+  const [surfaceFilter, setSurfaceFilter] = useState<SurfaceFilter>("All");
   const [pointTypeFilter, setPointTypeFilter] = useState<PointTypeFilter>("All");
 
   const filteredPoints = useMemo(
-    () => elitePressurePatterns.filter((point) => {
+    () => elitePressurePoints.filter((point) => {
       const rallyMatches =
         pointTypeFilter === "All" ||
         (pointTypeFilter === "Short point / first strike" && point.rallyLength !== null && point.rallyLength <= 4) ||
         (pointTypeFilter === "Medium rally" && point.rallyLength !== null && point.rallyLength >= 5 && point.rallyLength <= 7) ||
         (pointTypeFilter === "Long rally" && point.rallyLength !== null && point.rallyLength >= 8);
+
       return (
         (playerFilter === "All" || point.elitePlayer === playerFilter) &&
         (triggerFilter === "All" || point.pressureTrigger === triggerFilter) &&
@@ -51,13 +53,19 @@ export default function EliteLibraryPage() {
 
   const groupedPoints = groupElitePointsByPlayer(filteredPoints);
   const visiblePlayers = profileOrder.filter((player) => groupedPoints[player]?.length);
-  const approvedCount = getApprovedEliteLibraryPoints(elitePressurePatterns).length;
+  const approvedCount = getApprovedEliteLibraryPoints(elitePressurePoints).length;
+  const approvedPercentage = elitePressurePoints.length
+    ? Math.round((approvedCount / elitePressurePoints.length) * 100)
+    : 0;
+  const visiblePercentage = elitePressurePoints.length
+    ? Math.round((filteredPoints.length / elitePressurePoints.length) * 100)
+    : 0;
 
   return (
     <PageShell
       eyebrow="Coaching intelligence"
       title="Elite pressure pattern library"
-      description="Observed patterns from reviewed elite clips, organized around repeated pressure behaviors and practical coaching translation. Current records are mock samples for product development, not definitive player conclusions."
+      description="Observed patterns from reviewed elite clips, organized around repeated pressure behaviors and practical coaching translation."
     >
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-slate-950 text-white shadow-sm">
         <div className="grid gap-6 p-6 lg:grid-cols-[1fr_auto] lg:items-end">
@@ -67,21 +75,22 @@ export default function EliteLibraryPage() {
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Profiles aggregate reviewed observations across pressure moments, while retaining every supporting point for inspection. Short points and long rallies are treated as different tactical windows, not as a value hierarchy.</p>
           </div>
           <div className="grid grid-cols-2 gap-3 text-center">
-            <Metric value={approvedCount} label="approved samples" />
-            <Metric value={elitePressurePatterns.length} label="sample rows" />
+            <Metric value={approvedCount} label="approved points" />
+            <Metric value={elitePressurePoints.length} label="reviewed rows" />
+            <Metric value={`${approvedPercentage}%`} label="approved" />
           </div>
         </div>
-        <div className="h-1 bg-slate-800"><div className="h-full bg-emerald-500" style={{ width: `${(approvedCount / elitePressurePatterns.length) * 100}%` }} /></div>
+        <div className="h-1 bg-slate-800"><div className="h-full bg-emerald-500" style={{ width: `${approvedPercentage}%` }} /></div>
       </section>
 
       <section className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Filter label="Elite player" value={playerFilter} options={playerOptions} onChange={(value) => setPlayerFilter(value as PlayerFilter)} />
-          <Filter label="Pressure trigger" value={triggerFilter} options={triggerOptions} onChange={(value) => setTriggerFilter(value as "All" | PressureTrigger)} />
-          <Filter label="Surface" value={surfaceFilter} options={surfaceOptions} onChange={(value) => setSurfaceFilter(value as "All" | Surface)} />
+          <Filter label="Pressure trigger" value={triggerFilter} options={triggerOptions} onChange={(value) => setTriggerFilter(value as TriggerFilter)} />
+          <Filter label="Surface" value={surfaceFilter} options={surfaceOptions} onChange={(value) => setSurfaceFilter(value as SurfaceFilter)} />
           <Filter label="Point type" value={pointTypeFilter} options={pointTypeOptions} onChange={(value) => setPointTypeFilter(value as PointTypeFilter)} />
         </div>
-        <p className="mt-4 text-sm text-slate-500">Profiles below reflect {filteredPoints.length} matching sample observations. Approved rows are preferred whenever available.</p>
+        <p className="mt-4 text-sm text-slate-500">Profiles below reflect {filteredPoints.length} of {elitePressurePoints.length} observations ({visiblePercentage}%).</p>
       </section>
 
       <section className="mt-8">
@@ -98,24 +107,12 @@ export default function EliteLibraryPage() {
         </div>
       </section>
 
-      <section className="mt-10 border-t border-slate-200 pt-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Supporting evidence</p>
-        <h2 className="mt-2 text-xl font-semibold text-slate-950">Individual elite pressure-point rows</h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Open a record to inspect the point-level observation behind the profiles. These are realistic mock/sample records pending replacement with verified MVP clips.</p>
-        <div className="mt-4 space-y-3">
-          {filteredPoints.map((point) => <EvidenceRow key={point.id} point={point} />)}
-          {!filteredPoints.length && <EmptyState />}
-        </div>
-      </section>
     </PageShell>
   );
 }
 
 function PressureProfile({ points, player }: { points: ElitePressurePoint[]; player: string }) {
   const summary = getPlayerPressureSummary(points, player);
-  const statusText = summary.reviewStatuses["In Review"]
-    ? `${summary.reviewStatuses["In Review"]} awaiting review`
-    : "All matching rows reviewed";
 
   return (
     <article className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -124,29 +121,62 @@ function PressureProfile({ points, player }: { points: ElitePressurePoint[]; pla
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Observed across reviewed elite clips</p>
           <h3 className="mt-1 text-2xl font-semibold text-slate-950">{player} pressure profile</h3>
         </div>
-        <div className="flex flex-wrap gap-2 text-xs font-semibold">
-          <StatusBadge>{summary.approvedPoints} approved</StatusBadge>
-          <StatusBadge tone="slate">{summary.highConfidencePoints} high confidence</StatusBadge>
-          <StatusBadge tone="slate">{statusText}</StatusBadge>
-        </div>
+        <StatusBadge>{summary.approvedPoints} approved / reviewed points</StatusBadge>
       </header>
-      <div className="grid gap-px bg-slate-200 lg:grid-cols-3">
-        <ProfileCell title="Most common pressure triggers"><CountList items={summary.pressureTriggers} /></ProfileCell>
-        <ProfileCell title="Primary pressure patterns"><CountList items={summary.topPatterns} /></ProfileCell>
-        <ProfileCell title="Common tags"><TagList items={summary.tags} /></ProfileCell>
-        <ProfileCell title="First-strike tendency" kicker="Short points · 4 shots or fewer"><CountList items={summary.shortPointPatterns} empty="No short-point observation in this view." /></ProfileCell>
-        <ProfileCell title="Long-rally pressure pattern" kicker="Long rallies · 8 shots or more"><CountList items={summary.longRallyPatterns} empty="No long-rally observation in this view." /></ProfileCell>
-        <ProfileCell title="Tactical principles"><TextList items={summary.tacticalPrinciples} /></ProfileCell>
+      <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(18rem,1fr)]">
+        <section><h4 className="text-base font-semibold text-slate-950">Pressure Tendencies</h4><p className="mt-2 text-sm leading-7 text-slate-700">{summary.pressureTendencies}</p></section>
+        <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Dominant pattern family</p>
+          <h4 className="mt-1 font-semibold text-slate-950">{summary.dominantPatternFamily}</h4>
+          <div className="mt-3 space-y-2">{summary.patternFamilies.map((family) => <PatternFamilyBar key={family.label} family={family} total={summary.evidencePoints.length} />)}</div>
+        </section>
       </div>
       <div className="border-t border-slate-200 bg-emerald-50/60 p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-800">Coaching translation</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-800">Coaching Takeaway</p>
         <TextList items={summary.coachingTakeaways} columns />
       </div>
+      <details className="group border-t border-slate-200 bg-white">
+        <summary className="flex cursor-pointer list-none items-center justify-between p-5 text-sm font-semibold text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-600">
+          <span className="group-open:hidden">View Supporting Evidence</span><span className="hidden group-open:inline">Hide Supporting Evidence</span><span aria-hidden="true" className="text-emerald-700">+</span>
+        </summary>
+        <div className="border-t border-slate-100 bg-slate-50 p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Supporting Evidence · Current reviewed MVP library</p>
+          <div className="mt-4 grid gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 lg:grid-cols-3">
+            <ProfileCell title="Pressure triggers"><CountList items={summary.pressureTriggers} /></ProfileCell>
+            <ProfileCell title="Primary patterns"><CountList items={summary.topPatterns} /></ProfileCell>
+            <ProfileCell title="Tags"><TagList items={summary.tags} /></ProfileCell>
+            <ProfileCell title="Short-point evidence" kicker="4 shots or fewer"><CountList items={summary.shortPointPatterns} empty="No short-point observation in this view." /></ProfileCell>
+            <ProfileCell title="Medium-rally evidence" kicker="5–7 shots"><CountList items={getRallyPatterns(summary.evidencePoints, 5, 7)} empty="No medium-rally observation in this view." /></ProfileCell>
+            <ProfileCell title="Long-rally evidence" kicker="8 shots or more"><CountList items={summary.longRallyPatterns} empty="No long-rally observation in this view." /></ProfileCell>
+            <ProfileCell title="Tactical principles"><TextList items={summary.tacticalPrinciples} /></ProfileCell>
+          </div>
+          {/* As the dataset grows, the UI should later show representative examples and filtered evidence rather than every point by default. */}
+          <div className="mt-5 space-y-3">{summary.evidencePoints.map((point) => <EvidenceRow key={point.id} point={point} />)}</div>
+        </div>
+      </details>
     </article>
   );
 }
 
+function PatternFamilyBar({ family, total }: { family: CountedValue; total: number }) {
+  const percentage = total ? Math.round((family.count / total) * 100) : 0;
+  return <div><div className="flex justify-between gap-3 text-xs text-slate-600"><span>{family.label}</span><span className="font-semibold">{percentage}%</span></div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-emerald-600" style={{ width: `${percentage}%` }} /></div></div>;
+}
+
+function getRallyPatterns(points: ElitePressurePoint[], minimum: number, maximum: number): CountedValue[] {
+  const counts = new Map<string, CountedValue>();
+  points.filter((point) => point.rallyLength !== null && point.rallyLength >= minimum && point.rallyLength <= maximum).forEach((point) => {
+    const current = counts.get(point.primaryPattern);
+    counts.set(point.primaryPattern, { label: point.primaryPattern, count: (current?.count ?? 0) + 1 });
+  });
+  return Array.from(counts.values()).sort((a, b) => b.count - a.count);
+}
+
 function EvidenceRow({ point }: { point: ElitePressurePoint }) {
+  const matchSource = [point.matchTournament, point.year ? String(point.year) : "", point.uploaderNote]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <details className="group rounded-lg border border-slate-200 bg-white shadow-sm">
       <summary className="flex cursor-pointer list-none flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
@@ -163,7 +193,7 @@ function EvidenceRow({ point }: { point: ElitePressurePoint }) {
         </div>
       </summary>
       <dl className="grid gap-5 border-t border-slate-100 bg-slate-50 p-5 text-sm md:grid-cols-2 xl:grid-cols-4">
-        <DataField label="Match / source status" value={`${point.matchTournament} · ${point.uploaderNote}`} wide />
+        <DataField label="Match / source status" value={matchSource} wide />
         <DataField label="Serve / return" value={point.serveOrReturn} />
         <DataField label="Point outcome" value={point.pointOutcome} />
         <DataField label="Tactical principle" value={point.tacticalPrinciple} wide />
@@ -175,7 +205,7 @@ function EvidenceRow({ point }: { point: ElitePressurePoint }) {
   );
 }
 
-function Metric({ value, label }: { value: number; label: string }) {
+function Metric({ value, label }: { value: number | string; label: string }) {
   return <div className="min-w-28 rounded-lg border border-slate-700 bg-slate-900 p-3"><p className="text-2xl font-semibold">{value}</p><p className="mt-1 text-xs text-slate-400">{label}</p></div>;
 }
 
@@ -211,5 +241,5 @@ function DataField({ label, value, wide = false }: { label: string; value: strin
 }
 
 function EmptyState() {
-  return <div className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-600">No sample observations match these filters.</div>;
+  return <div className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-600">No elite observations match these filters.</div>;
 }

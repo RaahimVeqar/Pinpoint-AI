@@ -115,6 +115,8 @@ export interface ElitePressurePoint {
   reviewStatus: ReviewStatus;
   reviewerCorrection: string;
   approvedForLibrary: boolean;
+  pointPatternFamily: string;
+  patternHierarchy: string;
 }
 
 export interface PlayerReport {
