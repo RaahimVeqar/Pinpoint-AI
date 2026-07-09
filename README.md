@@ -20,9 +20,15 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 Never commit API keys, Supabase credentials, OpenAI keys, or player footage credentials. Use `.env.local` for local secrets and keep `.env.example` placeholder-only.
 
+## Backend roadmap
+
+The current app uses the local JSON elite pressure-point dataset. The next backend phase is Supabase, with `elite_pressure_points` as the first database table because it maps directly to the reviewed local dataset and powers the Elite Library.
+
+Player clips should later use private storage, and video files must not be committed to GitHub. OpenAI integration should come after the database and storage structure is ready so generated analysis can reference saved clips and Elite Library evidence cleanly.
+
 ## Elite Pressure-Point Dataset
 
-Real dataset collection starts outside the app in CSV or Google Sheets. The app currently uses mock data; [`data/elite-pressure-points-template.csv`](data/elite-pressure-points-template.csv) defines the structure for a future import. Do not commit real footage or private credentials to this repository.
+Real dataset collection starts outside the app in CSV or Google Sheets. The app currently uses the local JSON dataset in [`data/elite-pressure-points.json`](data/elite-pressure-points.json); [`data/elite-pressure-points-template.csv`](data/elite-pressure-points-template.csv) defines the structure for future imports. Do not commit real footage or private credentials to this repository.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
