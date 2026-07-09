@@ -314,20 +314,20 @@ export const reportSummaries: ReportSummary[] = [
     createdAt: "2026-06-14",
     pressurePointsAnalyzed: 3,
     summary:
-      "Ayaan created value when he committed early to serve plus-one patterns, but return points under break pressure still need clearer court-position rules.",
+      "Ayaan's observed pressure tendency is strongest when he commits early to serve plus-one patterns. The main breakdown pattern appears on return points under break pressure, where he needs clearer court-position rules and a next-time reset target.",
     eliteComparisons: ["Federer serve plus-one", "Djokovic deep-middle return"],
     strengths: [
       "Committed to forehand patterns when serving at deuce.",
       "Improved first-ball clarity in tiebreak points.",
     ],
     vulnerabilities: [
-      "Return games became passive on second break-point chances.",
-      "Backhand tolerance dropped after long neutral rallies.",
+      "Breakdown pattern: return games became passive on second break-point chances.",
+      "Breakdown pattern: backhand tolerance dropped after long neutral rallies.",
     ],
     recommendations: [
-      "Build a two-target return plan for break points.",
-      "Rehearse deuce patterns with serve location called before the point.",
-      "Add backhand crosscourt tolerance blocks after missed first serves.",
+      "Coaching priority: build a two-target return plan for break points.",
+      "Next-time adjustment: rehearse deuce patterns with serve location called before the point.",
+      "Coaching priority: add backhand crosscourt tolerance blocks after missed first serves.",
     ],
   },
   {
@@ -338,20 +338,20 @@ export const reportSummaries: ReportSummary[] = [
     createdAt: "2026-06-15",
     pressurePointsAnalyzed: 2,
     summary:
-      "Maya handled set and break points with disciplined return targets and high-margin rally shape before changing direction.",
+      "Maya's observed pressure tendency is disciplined target selection on set and break points. Her elite comparison points toward high-margin rally shape before direction changes, with coaching priority on recovery after wide patterns.",
     eliteComparisons: ["Nadal margin before attack", "Djokovic deep-middle return"],
     strengths: [
       "Used body serves and heavy shape to protect set-point leads.",
       "Return depth improved when defending second-serve break points.",
     ],
     vulnerabilities: [
-      "Can become late to recover after wide forehand patterns on clay.",
-      "Occasional hesitation before attacking short backhands.",
+      "Breakdown pattern: recovery can be late after wide forehand patterns on clay.",
+      "Breakdown pattern: occasional hesitation before attacking short backhands.",
     ],
     recommendations: [
-      "Keep the deep-middle return as the default break-point target.",
-      "Add recovery-position cues after wide forehands.",
-      "Use controlled backhand-line acceleration only after depth is established.",
+      "Next-time adjustment: keep the deep-middle return as the default break-point target.",
+      "Coaching priority: add recovery-position cues after wide forehands.",
+      "Next-time adjustment: use controlled backhand-line acceleration only after depth is established.",
     ],
   },
 ];

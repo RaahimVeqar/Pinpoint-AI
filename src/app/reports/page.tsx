@@ -114,7 +114,7 @@ export default function ReportsPage() {
           <div className="mt-6 grid gap-6 lg:grid-cols-3">
             <section>
               <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-                Strengths
+                Observed pressure tendencies
               </h3>
               <ul className="mt-3 space-y-3 text-sm leading-6 text-slate-700">
                 {report.strengths.map((item) => (
@@ -124,7 +124,7 @@ export default function ReportsPage() {
             </section>
             <section>
               <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-                Vulnerabilities
+                Breakdown patterns
               </h3>
               <ul className="mt-3 space-y-3 text-sm leading-6 text-slate-700">
                 {report.vulnerabilities.map((item) => (
@@ -134,7 +134,7 @@ export default function ReportsPage() {
             </section>
             <section>
               <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-                Recommendations
+                Coaching priorities
               </h3>
               <ul className="mt-3 space-y-3 text-sm leading-6 text-slate-700">
                 {report.recommendations.map((item) => (
@@ -150,6 +150,8 @@ export default function ReportsPage() {
             </h3>
             <p className="mt-2 text-sm leading-6 text-slate-700">
               Compared with the elite pressure library, the closest patterns are: {report.eliteComparisons.join(" | ")}. These references inform coaching judgment rather than prescribing what an elite player would always do.
+              Next-time adjustments should be scaled to the player&apos;s current
+              pattern, score context, and available court position.
             </p>
           </div>
 
@@ -252,14 +254,16 @@ export default function ReportsPage() {
                     </div>
                     <div>
                       <dt className="font-medium text-slate-500">
-                        Pattern observed
+                        Observed pressure tendency
                       </dt>
                       <dd className="mt-1 leading-6 text-slate-900">
                         {point.patternObserved}
                       </dd>
                     </div>
                     <div>
-                      <dt className="font-medium text-slate-500">Coach note</dt>
+                      <dt className="font-medium text-slate-500">
+                        Coaching priority
+                      </dt>
                       <dd className="mt-1 leading-6 text-slate-900">
                         {point.coachNote}
                       </dd>

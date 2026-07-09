@@ -28,6 +28,8 @@ export const SURFACES = ["Hard", "Clay", "Grass", "Indoor Hard"] as const;
 
 export const SERVE_OR_RETURN_OPTIONS = ["Serve", "Return", "Unknown"] as const;
 
+export const PLAYER_POINT_OUTCOMES = ["Won", "Lost", "Unknown"] as const;
+
 export const AGGRESSION_LEVELS = ["Controlled", "Balanced", "High"] as const;
 
 export const RISK_DECISIONS = [
@@ -41,6 +43,7 @@ export type ConfidenceLevel = (typeof CONFIDENCE_LEVELS)[number];
 export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
 export type Surface = (typeof SURFACES)[number];
 export type ServeOrReturn = (typeof SERVE_OR_RETURN_OPTIONS)[number];
+export type PlayerPointOutcome = (typeof PLAYER_POINT_OUTCOMES)[number];
 export type AggressionLevel = (typeof AGGRESSION_LEVELS)[number];
 export type RiskDecision = (typeof RISK_DECISIONS)[number];
 
@@ -52,6 +55,7 @@ export interface ClipContext {
   timestampOrRange: string;
   scoreContext: string;
   pressureTrigger: PressureTrigger;
+  playerPointOutcome?: PlayerPointOutcome;
   coachNote: string;
   createdAt: string;
 }
@@ -61,9 +65,16 @@ export interface AIDraftAnalysis {
   clipContextId: string;
   serveOrReturn: ServeOrReturn;
   pointOutcome: string;
+  playerPointOutcome?: PlayerPointOutcome;
   firstServeIn: boolean | null;
   rallyLengthEstimate: number | null;
   primaryPattern: string;
+  pressurePatternFamily?: string;
+  likelyBreakdownMoment?: string;
+  decisionQuality?: string;
+  executionQuality?: string;
+  missedOpportunity?: string;
+  eliteReferencePattern?: string;
   aggressionLevel: AggressionLevel;
   riskDecision: RiskDecision;
   shotThatDecidedPoint: string;
@@ -75,6 +86,8 @@ export interface AIDraftAnalysis {
   tags: string[];
   confidenceLevel: ConfidenceLevel;
   eliteComparison: string;
+  nextTimeAdjustment?: string;
+  trainingFocus?: string;
   analysisNotes: string;
   reviewStatus: ReviewStatus;
 }

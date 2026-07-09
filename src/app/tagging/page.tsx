@@ -5,7 +5,9 @@ import { FormEvent, useState } from "react";
 import { PageShell } from "@/components/page-shell";
 import { matchSessions, players } from "@/lib/mock-data";
 import {
+  PLAYER_POINT_OUTCOMES,
   PRESSURE_TRIGGERS,
+  type PlayerPointOutcome,
   type PressureTrigger,
 } from "@/lib/pinpoint-types";
 
@@ -16,15 +18,23 @@ type ClipContext = {
   timestamp: string;
   scoreContext: string;
   pressureTrigger: PressureTrigger | "";
+  playerPointOutcome: PlayerPointOutcome;
   coachNote: string;
 };
 
 type AnalysisDraft = {
   serveOrReturn: string;
   pointOutcome: string;
+  playerPointOutcome: string;
   firstServeIn: string;
   rallyLengthEstimate: string;
   primaryPattern: string;
+  pressurePatternFamily: string;
+  likelyBreakdownMoment: string;
+  decisionQuality: string;
+  executionQuality: string;
+  missedOpportunity: string;
+  eliteReferencePattern: string;
   aggressionLevel: string;
   riskDecision: string;
   shotThatDecidedPoint: string;
@@ -36,15 +46,24 @@ type AnalysisDraft = {
   tags: string[];
   confidenceLevel: string;
   eliteComparison: string;
+  nextTimeAdjustment: string;
+  trainingFocus: string;
   analysisNotes: string;
 };
 
 const analysisLabels: Record<keyof AnalysisDraft, string> = {
   serveOrReturn: "Serve / return",
   pointOutcome: "Point outcome",
+  playerPointOutcome: "Player point outcome",
   firstServeIn: "First serve in",
   rallyLengthEstimate: "Rally length estimate",
-  primaryPattern: "Primary pattern detected",
+  primaryPattern: "What happened",
+  pressurePatternFamily: "Pressure pattern family",
+  likelyBreakdownMoment: "Breakdown moment",
+  decisionQuality: "Decision quality",
+  executionQuality: "Execution quality",
+  missedOpportunity: "Missed opportunity",
+  eliteReferencePattern: "Elite reference pattern",
   aggressionLevel: "Aggression level",
   riskDecision: "Risk decision",
   shotThatDecidedPoint: "Shot that decided point",
@@ -56,8 +75,53 @@ const analysisLabels: Record<keyof AnalysisDraft, string> = {
   tags: "Tags",
   confidenceLevel: "Confidence level",
   eliteComparison: "Elite comparison",
+  nextTimeAdjustment: "Next-time adjustment",
+  trainingFocus: "Training focus",
   analysisNotes: "Analysis notes",
 };
+
+const analysisDisplayOrder: (keyof AnalysisDraft)[] = [
+  "primaryPattern",
+  "pressurePatternFamily",
+  "likelyBreakdownMoment",
+  "eliteComparison",
+  "nextTimeAdjustment",
+  "trainingFocus",
+  "coachingTakeaway",
+  "decisionQuality",
+  "executionQuality",
+  "missedOpportunity",
+  "eliteReferencePattern",
+  "serveOrReturn",
+  "playerPointOutcome",
+  "pointOutcome",
+  "rallyLengthEstimate",
+  "riskDecision",
+  "aggressionLevel",
+  "firstServeIn",
+  "shotThatDecidedPoint",
+  "errorOrWinnerType",
+  "resetBehavior",
+  "bodyLanguageNote",
+  "tacticalPrinciple",
+  "tags",
+  "confidenceLevel",
+  "analysisNotes",
+];
+
+const fullWidthAnalysisFields = new Set<keyof AnalysisDraft>([
+  "primaryPattern",
+  "pressurePatternFamily",
+  "likelyBreakdownMoment",
+  "eliteComparison",
+  "nextTimeAdjustment",
+  "trainingFocus",
+  "coachingTakeaway",
+  "decisionQuality",
+  "executionQuality",
+  "missedOpportunity",
+  "analysisNotes",
+]);
 
 function formatAnalysisValue(value: AnalysisDraft[keyof AnalysisDraft]) {
   return Array.isArray(value) ? value.join(", ") : value;
@@ -82,6 +146,7 @@ export default function TaggingPage() {
     timestamp: "00:42:12-00:42:24",
     scoreContext: "5-5, deuce, second set",
     pressureTrigger: "Deuce",
+    playerPointOutcome: "Lost",
     coachNote: "",
   });
   const [analysis, setAnalysis] = useState<AnalysisDraft | null>(null);
@@ -131,6 +196,7 @@ export default function TaggingPage() {
           timestampOrRange: context.timestamp,
           scoreContext: context.scoreContext,
           pressureTrigger: context.pressureTrigger,
+          playerPointOutcome: context.playerPointOutcome,
           coachNote: context.coachNote,
         }),
       });
@@ -305,6 +371,26 @@ export default function TaggingPage() {
                 ))}
               </select>
             </label>
+
+            <label className="space-y-2">
+              <span className="text-sm font-medium text-slate-700">
+                Player point outcome
+              </span>
+              <select
+                value={context.playerPointOutcome}
+                onChange={(event) =>
+                  updateContext(
+                    "playerPointOutcome",
+                    event.target.value as PlayerPointOutcome,
+                  )
+                }
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+              >
+                {PLAYER_POINT_OUTCOMES.map((outcome) => (
+                  <option key={outcome}>{outcome}</option>
+                ))}
+              </select>
+            </label>
           </div>
 
           <label className="mt-4 block space-y-2">
@@ -350,8 +436,9 @@ export default function TaggingPage() {
                 AI Draft Analysis
               </h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                Review AI-inferred observations before they become part of the
-                player record.
+                Review the coach-facing feedback before it becomes part of the
+                player record. Lost points are framed around the next useful
+                adjustment, not blame.
               </p>
             </div>
             {analysis && (
@@ -372,17 +459,11 @@ export default function TaggingPage() {
             </div>
           ) : (
             <dl className="mt-5 grid gap-x-8 gap-y-5 md:grid-cols-2">
-              {(Object.keys(analysisLabels) as (keyof AnalysisDraft)[]).map(
+              {analysisDisplayOrder.map(
                 (field) => (
                   <div
                     key={field}
-                    className={
-                      field === "coachingTakeaway" ||
-                      field === "eliteComparison" ||
-                      field === "analysisNotes"
-                        ? "md:col-span-2"
-                        : ""
-                    }
+                    className={fullWidthAnalysisFields.has(field) ? "md:col-span-2" : ""}
                   >
                     <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                       {analysisLabels[field]}
