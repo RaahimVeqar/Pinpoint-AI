@@ -195,20 +195,118 @@ export function getPlayerPressureSummary(
 export function getPressureTendencies(points: ElitePressurePoint[], player: string): string {
   if (!points.length) return `No reviewed pressure tendencies are available for ${player} in this view.`;
   const families = countValues(points, "pointPatternFamily");
-  const risks = countValues(points, "riskDecision");
-  const patterns = countValues(points, "primaryPattern");
   const short = points.filter((point) => point.rallyLength !== null && point.rallyLength <= 4).length;
   const sustained = points.filter((point) => point.rallyLength !== null && point.rallyLength >= 8).length;
-  const rallyTendency = short > sustained ? "The reviewed sample leans toward short, first-strike points" : sustained > short ? "The reviewed sample leans toward sustained rallies" : "The reviewed sample is balanced between short points and sustained rallies";
-  const family = families.length > 1 && families[0].count === families[1].count ? "a balanced mix of controlled construction and early initiative" : families[0]?.label.toLowerCase() ?? "varied pressure patterns";
-  const behavior = patterns.slice(0, 2).map((item) => item.label.toLowerCase()).join(" and ");
+  const rallyTendency = short > sustained ? "He tends to look for earlier first-strike control when the opening is clear" : sustained > short ? "He is comfortable extending pressure through longer exchanges" : "He can work through both short first-strike windows and longer construction phases";
+  const family = getPatternFamilyPhrase(families);
+  const behavior = getBehaviorPhrase(points);
+  const risk = getRiskPhrase(points);
+  const reset = getResetPhrase(points);
   const profile = playerProfiles.find((item) => item.elitePlayer.toLowerCase() === player.toLowerCase());
-  const execution = families[0]?.label.startsWith("Early Initiative")
+  const execution = getExecutionPhrase(families, profile);
+  const finish = getFinishPhrase(points);
+  return `${player}'s pressure profile is built around ${family}. He tends to ${behavior}, with ${risk} and ${reset}. ${execution} ${rallyTendency}, and ${finish}`;
+}
+
+function getPatternFamilyPhrase(families: CountedValue[]): string {
+  if (families.length > 1 && families[0].count === families[1].count) {
+    return "a balanced mix of controlled construction and early initiative";
+  }
+  if (families[0]?.label.startsWith("Early Initiative")) {
+    return "early initiative and first-strike dictation";
+  }
+  if (families[0]?.label.startsWith("Sustained Pressure")) {
+    return "sustained pressure and controlled point construction";
+  }
+  return "varied pressure patterns";
+}
+
+function getBehaviorPhrase(points: ElitePressurePoint[]): string {
+  const tags = normalizeTags(points.flatMap((point) => point.tags));
+  const tagText = tags.join(" ");
+  const has = (pattern: RegExp) => pattern.test(tagText);
+  const behaviors = [
+    has(/return|neutral/i) ? "absorb the first pressure ball" : "",
+    has(/depth|baseline|rally|margin|shape|heavy|pace absorption/i)
+      ? "hold depth and margin through the middle of the rally"
+      : "",
+    has(/serve \+ 1|return \+ 1|first strike|early contact|plus-one/i)
+      ? "take the first clear plus-one opportunity"
+      : "",
+    has(/transition|forecourt|net|volley|approach|forward/i)
+      ? "move forward once court position is available"
+      : "",
+    has(/direction|redirection|open court|line|angle/i)
+      ? "change direction after creating a positional opening"
+      : "",
+  ].filter(Boolean);
+
+  return joinPhrase(behaviors.slice(0, 3)) || "build pressure through repeatable, high-percentage patterns";
+}
+
+function getRiskPhrase(points: ElitePressurePoint[]): string {
+  const riskText = points.map((point) => point.riskDecision).join(" ").toLowerCase();
+  const controlled = (riskText.match(/controlled|safe|margin|low-percentage|does not force|avoid/g) ?? []).length;
+  const aggressive = (riskText.match(/aggressive|attacking|accelerat|first-strike|commits/g) ?? []).length;
+  const opportunistic = (riskText.match(/opening|opportunity|available|short|clear target|right ball/g) ?? []).length;
+
+  if (controlled >= aggressive && controlled >= opportunistic) return "controlled risk selection";
+  if (opportunistic >= aggressive) return "opportunity-based risk selection";
+  return "organized attacking risk";
+}
+
+function getResetPhrase(points: ElitePressurePoint[]): string {
+  const resetText = points.map((point) => point.resetBehavior).join(" ").toLowerCase();
+  const calm = (resetText.match(/calm|composed|controlled|walks back|turns back|resets/g) ?? []).length;
+  const expressive = (resetText.match(/fist|vocal|celebration|pump|gesture/g) ?? []).length;
+
+  if (calm >= expressive) return "a composed reset between pressure moments";
+  return "an emotional release that still returns quickly to the next-point routine";
+}
+
+function getExecutionPhrase(
+  families: CountedValue[],
+  profile:
+    | {
+        earlyInitiativeExecution?: string;
+        sustainedPressureExecution?: string;
+      }
+    | undefined,
+): string {
+  const useEarly = families[0]?.label.startsWith("Early Initiative");
+  const rawExecution = useEarly
     ? profile?.earlyInitiativeExecution
     : profile?.sustainedPressureExecution;
-  const finishingTags = normalizeTags(points.flatMap((point) => point.tags)).filter((tag) => /(finish|net|forward|approach|winner|open court|short ball|volley)/i.test(tag));
-  const finish = finishingTags.length ? `Finishing evidence most often points to ${finishingTags.slice(0, 2).join(" and ")}.` : "Finishing choices follow the opening created rather than forcing an immediate low-percentage strike.";
-  return `${player} most often shows ${family} under pressure, repeatedly using ${behavior || "controlled point construction"}. ${execution ?? "Court position changes when the rally creates a usable opening."} Risk decisions are predominantly ${risks[0]?.label.toLowerCase() ?? "calculated"}; ${rallyTendency.toLowerCase()}. ${finish}`;
+
+  if (!rawExecution || /^No approved/i.test(rawExecution)) {
+    return "Court position changes only after the rally has produced a usable opening.";
+  }
+
+  return rawExecution.replace(/\.$/, ".");
+}
+
+function getFinishPhrase(points: ElitePressurePoint[]): string {
+  const tags = normalizeTags(points.flatMap((point) => point.tags));
+  const tagText = tags.join(" ");
+  const forwardFinish = /(finish|net|forward|approach|forecourt|volley)/i.test(tagText);
+  const openCourtFinish = /(open court|short ball|winner|direction|redirection|line|angle)/i.test(tagText);
+
+  if (forwardFinish && openCourtFinish) {
+    return "his finishing tends to come from forward movement or open-court acceleration rather than a rushed low-margin shot.";
+  }
+  if (forwardFinish) {
+    return "his finishing often comes by converting pressure into forward court position.";
+  }
+  if (openCourtFinish) {
+    return "his finishing usually appears after an opening has been created for acceleration into space.";
+  }
+  return "his finishing choices follow the pressure he has already built rather than forcing the point early.";
+}
+
+function joinPhrase(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
 }
 
 function getPreferredPlayerPoints(
