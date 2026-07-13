@@ -8,6 +8,7 @@ import {
   pressurePoints,
   reportSummaries,
 } from "@/lib/mock-data";
+import { savedClipAnalyses, savedPlayerReports } from "@/lib/player-clip-data";
 
 export default function ReportsPage() {
   const [selectedReportId, setSelectedReportId] = useState(reportSummaries[0].id);
@@ -30,7 +31,7 @@ export default function ReportsPage() {
     <PageShell
       eyebrow="Coaching output"
       title="Reports"
-      description="Review coach-ready summaries built from pressure-point analysis and comparison anchors in the elite library."
+      description="Review coach-ready summaries built from saved clip analyses, constructive next-time adjustments, and comparison anchors in the elite library."
     >
       <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
         <aside className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -146,14 +147,98 @@ export default function ReportsPage() {
 
           <div className="mt-6 rounded-md bg-slate-50 p-4">
             <h3 className="text-sm font-semibold text-slate-950">
-              Current elite pressure library comparisons
+              Reports from saved clip analyses
             </h3>
             <p className="mt-2 text-sm leading-6 text-slate-700">
-              Compared with the elite pressure library, the closest patterns are: {report.eliteComparisons.join(" | ")}. These references inform coaching judgment rather than prescribing what an elite player would always do.
-              Next-time adjustments should be scaled to the player&apos;s current
-              pattern, score context, and available court position.
+              Compared with the elite pressure library, the closest patterns
+              are: {report.eliteComparisons.join(" | ")}. Saved analyses should
+              preserve what happened, where the point changed, the relevant
+              elite pattern, the next-time adjustment, and the training focus.
+              Lost points should guide constructive coaching priorities rather
+              than stand alone as negative outcomes.
             </p>
           </div>
+
+          <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4">
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-950">
+                  Mock saved reports
+                </h3>
+                <p className="mt-1 text-sm text-slate-600">
+                  These reports demonstrate how saved clip analyses will feed
+                  reusable coaching summaries before Supabase is connected.
+                </p>
+              </div>
+              <p className="text-sm font-medium text-slate-500">
+                {savedPlayerReports.length} mock reports
+              </p>
+            </div>
+            <div className="mt-4 grid gap-4 lg:grid-cols-2">
+              {savedPlayerReports.map((savedReport) => (
+                <article
+                  key={savedReport.id}
+                  className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+                >
+                  <h4 className="font-semibold text-slate-950">
+                    {savedReport.playerName}
+                  </h4>
+                  <p className="mt-1 text-sm text-slate-600">
+                    {savedReport.matchSession}
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-slate-700">
+                    {savedReport.overallPressureTendency}
+                  </p>
+                  <p className="mt-3 text-sm font-medium text-slate-900">
+                    Built from {savedReport.clipAnalysisIds.length} saved clip
+                    analysis
+                    {savedReport.clipAnalysisIds.length === 1 ? "" : "es"}.
+                  </p>
+                  <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+                    {savedReport.coachingPriorities.map((priority) => (
+                      <li key={priority}>{priority}</li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4">
+            <h3 className="text-lg font-semibold text-slate-950">
+              Constructive saved analysis examples
+            </h3>
+            <div className="mt-4 space-y-4">
+              {savedClipAnalyses
+                .filter((analysis) => analysis.playerPointOutcome === "Lost")
+                .map((analysis) => (
+                  <article
+                    key={analysis.id}
+                    className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+                  >
+                    <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                      <div>
+                        <h4 className="font-semibold text-slate-950">
+                          {analysis.playerName}
+                        </h4>
+                        <p className="mt-1 text-sm text-slate-600">
+                          {analysis.pressurePatternFamily}
+                        </p>
+                      </div>
+                      <span className="w-fit rounded-md bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">
+                        Lost point - next adjustment saved
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-slate-700">
+                      {analysis.nextTimeAdjustment}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-700">
+                      Training focus: {analysis.trainingFocus}
+                    </p>
+                  </article>
+                ))}
+            </div>
+          </section>
 
           <section className="mt-6">
             <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">

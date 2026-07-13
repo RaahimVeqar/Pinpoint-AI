@@ -143,3 +143,52 @@ export interface PlayerReport {
   coachingPriorities: string[];
   createdAt: string;
 }
+
+export interface PlayerClip {
+  id: string;
+  playerName: string;
+  matchSession: string;
+  clipTitle: string;
+  clipSource: string;
+  timestampOrRange: string;
+  scoreContext: string;
+  pressureTrigger: PressureTrigger;
+  playerPointOutcome: PlayerPointOutcome;
+  pointPatternFamily: string;
+  createdAt: string;
+}
+
+export interface SavedClipAnalysis {
+  id: string;
+  clipId: string;
+  playerName: string;
+  matchSession: string;
+  playerPointOutcome: PlayerPointOutcome;
+  pressurePatternFamily: string;
+  whatHappened: string;
+  likelyBreakdownMoment: string;
+  decisionQuality: string;
+  executionQuality: string;
+  missedOpportunity: string;
+  eliteReferencePattern: string;
+  eliteComparison: string;
+  nextTimeAdjustment: string;
+  trainingFocus: string;
+  coachingTakeaway: string;
+  confidenceLevel: ConfidenceLevel;
+  reviewStatus: ReviewStatus;
+  createdAt: string;
+}
+
+export interface SavedPlayerReport {
+  id: string;
+  playerName: string;
+  matchSession: string;
+  clipAnalysisIds: string[];
+  overallPressureTendency: string;
+  recurringBreakdowns: string[];
+  eliteComparisonSummary: string;
+  coachingPriorities: string[];
+  nextSessionFocus: string;
+  createdAt: string;
+}

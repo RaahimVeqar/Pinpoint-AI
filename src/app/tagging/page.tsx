@@ -243,6 +243,18 @@ export default function TaggingPage() {
           </p>
         </section>
 
+        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-950">
+            Future save behavior
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Analyzed clips will be saved to a match or training session after
+            coach review. Saved reports can be reopened later for demo or
+            coaching review, and reanalysis will be a manual action rather than
+            an automatic background update.
+          </p>
+        </section>
+
         <form
           onSubmit={generateDraft}
           className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
