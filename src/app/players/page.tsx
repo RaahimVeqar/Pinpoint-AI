@@ -1,177 +1,76 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
-import {
-  matchSessions,
-  players,
-  pressurePoints,
-  reportSummaries,
-} from "@/lib/mock-data";
+import { matchSessions, players, pressurePoints, reportSummaries } from "@/lib/mock-data";
 
 export default function PlayersPage() {
   const [selectedPlayerId, setSelectedPlayerId] = useState(players[0].id);
-  const selectedPlayer =
-    players.find((player) => player.id === selectedPlayerId) ?? players[0];
-  const playerSessions = useMemo(
-    () =>
-      matchSessions.filter((session) => session.playerId === selectedPlayer.id),
-    [selectedPlayer.id],
-  );
-  const playerPoints = useMemo(
-    () => pressurePoints.filter((point) => point.playerId === selectedPlayer.id),
-    [selectedPlayer.id],
-  );
-  const linkedReport = reportSummaries.find(
-    (report) => report.playerId === selectedPlayer.id,
-  );
+  const selectedPlayer = players.find((player) => player.id === selectedPlayerId) ?? players[0];
+  const playerSessions = useMemo(() => matchSessions.filter((session) => session.playerId === selectedPlayer.id), [selectedPlayer.id]);
+  const playerPoints = useMemo(() => pressurePoints.filter((point) => point.playerId === selectedPlayer.id), [selectedPlayer.id]);
+  const linkedReport = reportSummaries.find((report) => report.playerId === selectedPlayer.id);
 
   return (
     <PageShell
-      eyebrow="Roster"
+      eyebrow="Player development"
       title="Players"
-      description="Manage developing player profiles, pressure tendencies, and current coaching priorities."
+      description="Move from the roster to a clear picture of each player's current pressure tendency, recent evidence, and coaching focus."
     >
-      <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
-        <div className="grid gap-4 lg:grid-cols-2">
-          {players.map((player) => {
-            const isSelected = player.id === selectedPlayer.id;
+      <div className="players-layout">
+        <section className="player-roster" aria-labelledby="roster-heading">
+          <div className="player-roster__head"><h2 id="roster-heading">Active roster</h2><span>{players.length} players</span></div>
+          <div className="player-roster__list">
+            {players.map((player) => {
+              const selected = player.id === selectedPlayer.id;
+              return (
+                <button key={player.id} type="button" aria-pressed={selected} onClick={() => setSelectedPlayerId(player.id)} className={selected ? "is-selected" : ""}>
+                  <div><strong>{player.name}</strong><span>{player.level} · {player.handedness}-handed</span></div>
+                  <div><strong className="tabular">{player.pressureWinRate}%</strong><span>pressure points</span></div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
 
-            return (
-              <button
-                key={player.id}
-                type="button"
-                onClick={() => setSelectedPlayerId(player.id)}
-                className={`rounded-lg border bg-white p-5 text-left shadow-sm transition ${
-                  isSelected
-                    ? "border-emerald-600 ring-2 ring-emerald-100"
-                    : "border-slate-200 hover:border-slate-300"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-lg font-semibold text-slate-950">
-                      {player.name}
-                    </h2>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {player.level} | {player.age} | {player.handedness}-handed
-                    </p>
-                  </div>
-                  <span className="rounded-md bg-emerald-50 px-2.5 py-1 text-sm font-semibold text-emerald-700">
-                    {player.pressureWinRate}%
-                  </span>
-                </div>
-                <dl className="mt-5 space-y-3 text-sm">
-                  <div>
-                    <dt className="font-medium text-slate-500">Style</dt>
-                    <dd className="mt-1 text-slate-900">
-                      {player.playingStyle}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium text-slate-500">
-                      Current focus
-                    </dt>
-                    <dd className="mt-1 leading-6 text-slate-900">
-                      {player.primaryFocus}
-                    </dd>
-                  </div>
-                </dl>
-              </button>
-            );
-          })}
-        </div>
+        <article className="surface player-profile">
+          <header className="player-profile__header">
+            <div><p>Player profile</p><h2>{selectedPlayer.name}</h2><span>{selectedPlayer.level} · Coach {selectedPlayer.coach}</span></div>
+            <div className="player-profile__rate"><strong className="tabular">{selectedPlayer.pressureWinRate}%</strong><span>observed pressure win rate</span></div>
+          </header>
 
-        <aside className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-4">
-            <div>
-              <h2 className="text-xl font-semibold text-slate-950">
-                {selectedPlayer.name}
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                {selectedPlayer.level} | Coach: {selectedPlayer.coach}
-              </p>
-            </div>
-            <span className="rounded-md bg-slate-950 px-2.5 py-1 text-sm font-semibold text-white">
-              {selectedPlayer.pressureWinRate}% win rate
-            </span>
+          <div className="player-profile__overview">
+            <section><span>Playing identity</span><h3>{selectedPlayer.playingStyle}</h3><p>{selectedPlayer.age}, {selectedPlayer.handedness}-handed player</p></section>
+            <section><span>Current coaching focus</span><h3>{selectedPlayer.primaryFocus}</h3></section>
           </div>
 
-          <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="font-medium text-slate-500">Player profile</dt>
-              <dd className="mt-1 leading-6 text-slate-900">
-                {selectedPlayer.age}, {selectedPlayer.handedness}-handed{" "}
-                {selectedPlayer.playingStyle.toLowerCase()}
-              </dd>
-            </div>
-            <div>
-              <dt className="font-medium text-slate-500">Current focus</dt>
-              <dd className="mt-1 leading-6 text-slate-900">
-                {selectedPlayer.primaryFocus}
-              </dd>
-            </div>
-            <div>
-              <dt className="font-medium text-slate-500">Sessions tracked</dt>
-              <dd className="mt-1 text-slate-900">{playerSessions.length}</dd>
-            </div>
-            <div>
-              <dt className="font-medium text-slate-500">Linked report</dt>
-              <dd className="mt-1 text-slate-900">
-                {linkedReport ? linkedReport.title : "No report drafted yet"}
-              </dd>
-            </div>
+          <dl className="player-profile__links">
+            <div><dt>Sessions tracked</dt><dd className="tabular">{playerSessions.length}</dd></div>
+            <div><dt>Pressure points tagged</dt><dd className="tabular">{playerPoints.length}</dd></div>
+            <div><dt>Linked report</dt><dd>{linkedReport ? linkedReport.title : "No report drafted yet"}</dd></div>
           </dl>
 
-          <section className="mt-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-              Recent pressure points
-            </h3>
+          <section className="player-evidence" aria-labelledby="recent-points-heading">
+            <div className="player-evidence__head"><div><h3 id="recent-points-heading">Recent pressure points</h3><p>The latest evidence informing this player&apos;s coaching focus.</p></div>{linkedReport && <Link href="/reports" className="button-secondary">Open report</Link>}</div>
             {playerPoints.length === 0 ? (
-              <p className="mt-3 text-sm leading-6 text-slate-600">
-                No pressure points tagged for this player yet.
-              </p>
+              <p className="notice">No pressure points have been tagged for this player yet.</p>
             ) : (
-              <div className="mt-3 space-y-3">
+              <div className="player-evidence__list">
                 {playerPoints.slice(0, 3).map((point) => {
-                  const pointSession = matchSessions.find(
-                    (session) => session.id === point.matchSessionId,
-                  );
-
+                  const pointSession = matchSessions.find((session) => session.id === point.matchSessionId);
                   return (
-                    <article
-                      key={point.id}
-                      className="rounded-md border border-slate-200 bg-slate-50 p-3"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-slate-950">
-                            {point.timestamp} | {point.trigger}
-                          </p>
-                          <p className="mt-1 text-xs text-slate-500">
-                            {pointSession?.event}
-                          </p>
-                        </div>
-                        <span
-                          className={`rounded-md px-2 py-1 text-xs font-semibold ${
-                            point.outcome === "Won"
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-rose-100 text-rose-700"
-                          }`}
-                        >
-                          {point.outcome}
-                        </span>
-                      </div>
-                      <p className="mt-2 text-sm leading-6 text-slate-700">
-                        {point.patternObserved}
-                      </p>
+                    <article key={point.id}>
+                      <div><strong className="tabular">{point.timestamp}</strong><span>{point.trigger} · {pointSession?.event}</span></div>
+                      <p>{point.patternObserved}</p>
+                      <span className={`status ${point.outcome === "Won" ? "status-success" : "status-danger"}`}>{point.outcome}</span>
                     </article>
                   );
                 })}
               </div>
             )}
           </section>
-        </aside>
+        </article>
       </div>
     </PageShell>
   );

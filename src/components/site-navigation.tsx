@@ -3,76 +3,109 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const navigationItems = [
+const primaryItems = [
   { href: "/", label: "Home" },
-  { href: "/dashboard", label: "Dashboard" },
   { href: "/players", label: "Players" },
   { href: "/matches", label: "Matches" },
-  { href: "/tagging", label: "Clip Analysis" },
-  { href: "/pipeline", label: "AI Pipeline" },
-  { href: "/dataset", label: "Dataset" },
-  { href: "/reports", label: "Reports" },
+  { href: "/tagging", label: "Analyze Clip" },
   { href: "/elite-library", label: "Elite Library" },
+  { href: "/reports", label: "Reports" },
 ];
+
+const builderItems = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/pipeline", label: "Pipeline" },
+  { href: "/dataset", label: "Dataset" },
+];
+
+const taglinePhrases = [
+  "Analyzing the moments that decide outcomes",
+  "Elite patterns, translated for development",
+  "Pressure points into coaching action",
+];
+
+function isCurrent(pathname: string, href: string) {
+  return href === "/" ? pathname === href : pathname.startsWith(href);
+}
 
 export function SiteNavigation() {
   const pathname = usePathname();
-
-  const taglinePhrases = [
-    "Analyzing the moments that decide outcomes",
-    "Where elite patterns inform player development",
-    "Turning pressure points into coaching insight",
-  ];
+  const builderIsActive = builderItems.some((item) =>
+    isCurrent(pathname, item.href),
+  );
 
   return (
-    <header className="border-b border-slate-200 bg-white">
-      <nav className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <Link href="/" className="flex min-w-0 items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-md bg-emerald-700 text-sm font-bold text-white">
-            P
-          </span>
-          <span>
-            <span className="block text-base font-semibold tracking-tight text-slate-950">
-              Pinpoint AI
+    <header className="site-header">
+      <div className="site-header__inner">
+        <div className="site-header__brand-row">
+          <Link href="/" className="brand-link" aria-label="Pinpoint AI home">
+            <span className="brand-mark" aria-hidden="true">
+              <span>P</span>
             </span>
-            <span className="tagline-marquee" aria-label={taglinePhrases[0]}>
-              <span className="tagline-marquee__track" aria-hidden="true">
-                {[0, 1].map((copy) => (
-                  <span className="tagline-marquee__group" key={copy}>
-                    {taglinePhrases.map((phrase) => (
-                      <span className="tagline-marquee__item" key={phrase}>
-                        {phrase}
-                      </span>
-                    ))}
-                  </span>
-                ))}
-              </span>
+            <span className="brand-copy">
+              <span className="brand-name">Pinpoint AI</span>
+              <span className="brand-category">Tennis intelligence</span>
             </span>
-          </span>
-        </Link>
-        <div className="flex flex-wrap gap-2">
-          {navigationItems.map((item) => {
-            const isActive =
-              item.href === "/"
-                ? pathname === item.href
-                : pathname.startsWith(item.href);
+          </Link>
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`rounded-md px-3 py-2 text-sm font-medium ${
-                  isActive
-                    ? "bg-slate-950 text-white"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+          <span className="tagline-marquee" aria-label={taglinePhrases[0]}>
+            <span className="tagline-marquee__track" aria-hidden="true">
+              {[0, 1].map((copy) => (
+                <span className="tagline-marquee__group" key={copy}>
+                  {taglinePhrases.map((phrase) => (
+                    <span className="tagline-marquee__item" key={phrase}>
+                      {phrase}
+                    </span>
+                  ))}
+                </span>
+              ))}
+            </span>
+          </span>
         </div>
-      </nav>
+
+        <nav className="primary-nav" aria-label="Primary navigation">
+          <div className="primary-nav__scroll">
+            {primaryItems.map((item) => {
+              const active = isCurrent(pathname, item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`nav-link ${active ? "nav-link--active" : ""}`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          <details className="builder-menu">
+            <summary
+              className={`nav-link builder-menu__trigger ${builderIsActive ? "nav-link--active" : ""}`}
+            >
+              Builder
+              <span aria-hidden="true" className="builder-menu__chevron">⌄</span>
+            </summary>
+            <div className="builder-menu__panel">
+              <p>Internal tools</p>
+              {builderItems.map((item) => {
+                const active = isCurrent(pathname, item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className={active ? "builder-link builder-link--active" : "builder-link"}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </details>
+        </nav>
+      </div>
     </header>
   );
 }

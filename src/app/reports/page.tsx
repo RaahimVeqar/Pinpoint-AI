@@ -2,362 +2,129 @@
 
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/page-shell";
-import {
-  matchSessions,
-  players,
-  pressurePoints,
-  reportSummaries,
-} from "@/lib/mock-data";
-import { savedClipAnalyses, savedPlayerReports } from "@/lib/player-clip-data";
+import { matchSessions, players, pressurePoints, reportSummaries } from "@/lib/mock-data";
 
 export default function ReportsPage() {
   const [selectedReportId, setSelectedReportId] = useState(reportSummaries[0].id);
-  const report =
-    reportSummaries.find((item) => item.id === selectedReportId) ??
-    reportSummaries[0];
+  const report = reportSummaries.find((item) => item.id === selectedReportId) ?? reportSummaries[0];
   const player = players.find((item) => item.id === report.playerId);
   const session = matchSessions.find((item) => item.id === report.matchSessionId);
   const reportPoints = useMemo(
-    () =>
-      pressurePoints.filter(
-        (point) =>
-          point.playerId === report.playerId &&
-          point.matchSessionId === report.matchSessionId,
-      ),
+    () => pressurePoints.filter((point) => point.playerId === report.playerId && point.matchSessionId === report.matchSessionId),
     [report],
   );
 
   return (
     <PageShell
-      eyebrow="Coaching output"
+      eyebrow="Coach-ready output"
       title="Reports"
-      description="Review coach-ready summaries built from saved clip analyses, constructive next-time adjustments, and comparison anchors in the elite library."
+      description="A focused pressure profile built from saved clip evidence, elite comparison, and the priorities that should shape the next session."
     >
-      <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
-        <aside className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <label className="block space-y-2">
-            <span className="text-sm font-semibold text-slate-700">
-              Select report
-            </span>
-            <select
-              value={selectedReportId}
-              onChange={(event) => setSelectedReportId(event.target.value)}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
-            >
+      <div className="reports-layout">
+        <aside className="report-browser" aria-label="Available reports">
+          <div className="report-browser__head">
+            <h2>Player reports</h2>
+            <span>{reportSummaries.length} available</span>
+          </div>
+          <label className="report-browser__select">
+            <span className="field-label">Select report</span>
+            <select value={selectedReportId} onChange={(event) => setSelectedReportId(event.target.value)} className="field-control">
               {reportSummaries.map((item) => {
-                const reportPlayer = players.find(
-                  (playerItem) => playerItem.id === item.playerId,
-                );
-
-                return (
-                  <option key={item.id} value={item.id}>
-                    {reportPlayer?.name} - {item.createdAt}
-                  </option>
-                );
+                const reportPlayer = players.find((candidate) => candidate.id === item.playerId);
+                return <option key={item.id} value={item.id}>{reportPlayer?.name} - {item.createdAt}</option>;
               })}
             </select>
           </label>
-
-          <div className="mt-5 space-y-3">
+          <div className="report-browser__list">
             {reportSummaries.map((item) => {
-              const reportPlayer = players.find(
-                (playerItem) => playerItem.id === item.playerId,
-              );
-              const reportSession = matchSessions.find(
-                (sessionItem) => sessionItem.id === item.matchSessionId,
-              );
-              const isSelected = item.id === report.id;
-
+              const reportPlayer = players.find((candidate) => candidate.id === item.playerId);
+              const reportSession = matchSessions.find((candidate) => candidate.id === item.matchSessionId);
+              const selected = item.id === report.id;
               return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setSelectedReportId(item.id)}
-                  className={`w-full rounded-md border p-3 text-left transition ${
-                    isSelected
-                      ? "border-emerald-600 bg-emerald-50"
-                      : "border-slate-200 bg-white hover:border-slate-300"
-                  }`}
-                >
-                  <span className="block text-sm font-semibold text-slate-950">
-                    {reportPlayer?.name}
-                  </span>
-                  <span className="mt-1 block text-xs leading-5 text-slate-600">
-                    {reportSession?.event}
-                  </span>
-                  <span className="mt-2 block text-xs font-medium text-slate-500">
-                    {item.pressurePointsAnalyzed} pressure points
-                  </span>
+                <button key={item.id} type="button" onClick={() => setSelectedReportId(item.id)} aria-pressed={selected} className={selected ? "is-selected" : ""}>
+                  <strong>{reportPlayer?.name}</strong>
+                  <span>{reportSession?.event}</span>
+                  <small>{item.pressurePointsAnalyzed} pressure points · {item.createdAt}</small>
                 </button>
               );
             })}
           </div>
         </aside>
 
-        <article className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 md:flex-row md:items-start md:justify-between">
+        <article className="report-document">
+          <header className="report-cover">
+            <div className="report-cover__meta">
+              <span>Pinpoint AI pressure review</span>
+              <span>{report.createdAt}</span>
+            </div>
+            <div className="report-cover__title">
+              <div>
+                <p>{player?.name}</p>
+                <h2>{report.title}</h2>
+                <span>{session?.event} · {session?.surface}</span>
+              </div>
+              <div className="report-cover__count"><strong className="tabular">{report.pressurePointsAnalyzed}</strong><span>linked points</span></div>
+            </div>
+            <p className="report-cover__summary">{report.summary}</p>
+          </header>
+
+          <section className="report-tendency" aria-labelledby="tendency-heading">
             <div>
-              <h2 className="text-2xl font-semibold text-slate-950">
-                {report.title}
-              </h2>
-              <p className="mt-2 text-sm text-slate-500">
-                {player?.name} | {session?.event} | Created {report.createdAt}
-              </p>
-              <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-700">
-                {report.summary}
-              </p>
+              <p>Overall pressure tendency</p>
+              <h3 id="tendency-heading">The clearest repeatable signal</h3>
+              <p>{report.strengths.join(" ")}</p>
             </div>
-            <div className="w-fit rounded-md bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
-              {report.pressurePointsAnalyzed} points analyzed
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
-            <section>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-                Observed pressure tendencies
-              </h3>
-              <ul className="mt-3 space-y-3 text-sm leading-6 text-slate-700">
-                {report.strengths.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
-            <section>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-                Breakdown patterns
-              </h3>
-              <ul className="mt-3 space-y-3 text-sm leading-6 text-slate-700">
-                {report.vulnerabilities.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
-            <section>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-                Coaching priorities
-              </h3>
-              <ul className="mt-3 space-y-3 text-sm leading-6 text-slate-700">
-                {report.recommendations.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
-          </div>
-
-          <div className="mt-6 rounded-md bg-slate-50 p-4">
-            <h3 className="text-sm font-semibold text-slate-950">
-              Reports from saved clip analyses
-            </h3>
-            <p className="mt-2 text-sm leading-6 text-slate-700">
-              Compared with the elite pressure library, the closest patterns
-              are: {report.eliteComparisons.join(" | ")}. Saved analyses should
-              preserve what happened, where the point changed, the relevant
-              elite pattern, the next-time adjustment, and the training focus.
-              Lost points should guide constructive coaching priorities rather
-              than stand alone as negative outcomes.
-            </p>
-          </div>
-
-          <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4">
-            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-950">
-                  Mock saved reports
-                </h3>
-                <p className="mt-1 text-sm text-slate-600">
-                  These reports demonstrate how saved clip analyses will feed
-                  reusable coaching summaries before Supabase is connected.
-                </p>
-              </div>
-              <p className="text-sm font-medium text-slate-500">
-                {savedPlayerReports.length} mock reports
-              </p>
-            </div>
-            <div className="mt-4 grid gap-4 lg:grid-cols-2">
-              {savedPlayerReports.map((savedReport) => (
-                <article
-                  key={savedReport.id}
-                  className="rounded-lg border border-slate-200 bg-slate-50 p-4"
-                >
-                  <h4 className="font-semibold text-slate-950">
-                    {savedReport.playerName}
-                  </h4>
-                  <p className="mt-1 text-sm text-slate-600">
-                    {savedReport.matchSession}
-                  </p>
-                  <p className="mt-3 text-sm leading-6 text-slate-700">
-                    {savedReport.overallPressureTendency}
-                  </p>
-                  <p className="mt-3 text-sm font-medium text-slate-900">
-                    Built from {savedReport.clipAnalysisIds.length} saved clip
-                    analysis
-                    {savedReport.clipAnalysisIds.length === 1 ? "" : "es"}.
-                  </p>
-                  <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
-                    {savedReport.coachingPriorities.map((priority) => (
-                      <li key={priority}>{priority}</li>
-                    ))}
-                  </ul>
-                </article>
-              ))}
-            </div>
+            <aside>
+              <span>Elite comparison</span>
+              <ul>{report.eliteComparisons.map((comparison) => <li key={comparison}>{comparison}</li>)}</ul>
+            </aside>
           </section>
 
-          <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4">
-            <h3 className="text-lg font-semibold text-slate-950">
-              Constructive saved analysis examples
-            </h3>
-            <div className="mt-4 space-y-4">
-              {savedClipAnalyses
-                .filter((analysis) => analysis.playerPointOutcome === "Lost")
-                .map((analysis) => (
-                  <article
-                    key={analysis.id}
-                    className="rounded-lg border border-slate-200 bg-slate-50 p-4"
-                  >
-                    <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                      <div>
-                        <h4 className="font-semibold text-slate-950">
-                          {analysis.playerName}
-                        </h4>
-                        <p className="mt-1 text-sm text-slate-600">
-                          {analysis.pressurePatternFamily}
-                        </p>
-                      </div>
-                      <span className="w-fit rounded-md bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">
-                        Lost point - next adjustment saved
-                      </span>
-                    </div>
-                    <p className="mt-3 text-sm leading-6 text-slate-700">
-                      {analysis.nextTimeAdjustment}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-700">
-                      Training focus: {analysis.trainingFocus}
-                    </p>
-                  </article>
-                ))}
-            </div>
+          <div className="report-findings">
+            <section aria-labelledby="breakdowns-heading">
+              <h3 id="breakdowns-heading">Recurring breakdowns</h3>
+              <p>Moments where decision clarity or execution became less repeatable.</p>
+              <ul>{report.vulnerabilities.map((item) => <li key={item}>{item.replace("Breakdown pattern: ", "")}</li>)}</ul>
+            </section>
+            <section aria-labelledby="priorities-heading">
+              <h3 id="priorities-heading">Coaching priorities</h3>
+              <p>High-value interventions to carry into training and match planning.</p>
+              <ul>{report.recommendations.map((item) => <li key={item}>{item.replace("Coaching priority: ", "").replace("Next-time adjustment: ", "")}</li>)}</ul>
+            </section>
+          </div>
+
+          <section className="next-session" aria-labelledby="next-session-heading">
+            <div><span>Next-session focus</span><h3 id="next-session-heading">Turn the report into one observable training behavior.</h3></div>
+            <p>{report.recommendations[0].replace("Coaching priority: ", "").replace("Next-time adjustment: ", "")}</p>
           </section>
 
-          <section className="mt-6">
-            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-950">
-                  Pressure Points Analyzed
-                </h3>
-                <p className="mt-1 text-sm text-slate-600">
-                  Individual pressure points supporting this coaching report.
-                </p>
-              </div>
-              <p className="text-sm font-medium text-slate-500">
-                {reportPoints.length} visible points
-              </p>
+          <section className="report-evidence" aria-labelledby="evidence-heading">
+            <div className="report-evidence__head">
+              <div><h3 id="evidence-heading">Linked clip evidence</h3><p>The pressure points supporting this report. Open a row for the match context and coaching note.</p></div>
+              <span>{reportPoints.length} clips</span>
             </div>
-
-            <div className="mt-4 space-y-4">
+            <div className="report-evidence__list">
               {reportPoints.map((point) => (
-                <article
-                  key={point.id}
-                  className="rounded-lg border border-slate-200 bg-slate-50 p-4"
-                >
-                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-950">
-                        {point.timestamp} | {point.scoreContext}
-                      </p>
-                      <p className="mt-1 text-sm text-slate-600">
-                        {point.trigger} | {point.server} serving to{" "}
-                        {point.returner}
-                      </p>
-                    </div>
-                    <span
-                      className={`w-fit rounded-md px-2.5 py-1 text-sm font-semibold ${
-                        point.outcome === "Won"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-rose-100 text-rose-700"
-                      }`}
-                    >
-                      {point.outcome}
-                    </span>
+                <details key={point.id}>
+                  <summary>
+                    <div><strong className="tabular">{point.timestamp}</strong><span>{point.scoreContext}</span></div>
+                    <div><span>{point.trigger}</span><span className={`status ${point.outcome === "Won" ? "status-success" : "status-danger"}`}>{point.outcome}</span><b aria-hidden="true">+</b></div>
+                  </summary>
+                  <div className="detail-body report-evidence__detail">
+                    <div><span>Observed tendency</span><p>{point.patternObserved}</p></div>
+                    <div><span>Coaching priority</span><p>{point.coachNote}</p></div>
+                    <dl>
+                      <div><dt>Serve / return</dt><dd>{point.server === player?.name ? "Serving" : "Returning"}</dd></div>
+                      <div><dt>Rally length</dt><dd>{point.rallyLength} shots</dd></div>
+                      <div><dt>Elite anchor</dt><dd>{point.eliteComparisonAnchor ?? "Not assigned"}</dd></div>
+                    </dl>
                   </div>
-
-                  <dl className="mt-4 grid gap-4 text-sm md:grid-cols-2">
-                    <div>
-                      <dt className="font-medium text-slate-500">
-                        Serve / return
-                      </dt>
-                      <dd className="mt-1 text-slate-900">
-                        {point.server === player?.name
-                          ? "Serving pressure point"
-                          : "Returning pressure point"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-slate-500">
-                        Rally length
-                      </dt>
-                      <dd className="mt-1 text-slate-900">
-                        {point.rallyLength} shots
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-slate-500">
-                        Score context
-                      </dt>
-                      <dd className="mt-1 text-slate-900">
-                        {point.scoreContext}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-slate-500">
-                        Pressure trigger
-                      </dt>
-                      <dd className="mt-1 text-slate-900">{point.trigger}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-slate-500">
-                        Server / returner
-                      </dt>
-                      <dd className="mt-1 text-slate-900">
-                        {point.server} / {point.returner}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-slate-500">
-                        Outcome
-                      </dt>
-                      <dd className="mt-1 text-slate-900">{point.outcome}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-slate-500">
-                        Elite pressure library anchor
-                      </dt>
-                      <dd className="mt-1 text-slate-900">
-                        {point.eliteComparisonAnchor ?? "Not assigned"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-slate-500">
-                        Observed pressure tendency
-                      </dt>
-                      <dd className="mt-1 leading-6 text-slate-900">
-                        {point.patternObserved}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-slate-500">
-                        Coaching priority
-                      </dt>
-                      <dd className="mt-1 leading-6 text-slate-900">
-                        {point.coachNote}
-                      </dd>
-                    </div>
-                  </dl>
-                </article>
+                </details>
               ))}
             </div>
           </section>
+
+          <footer className="report-footer"><span>Pinpoint AI</span><p>Evidence-led pressure analysis for player development.</p></footer>
         </article>
       </div>
     </PageShell>

@@ -77,43 +77,44 @@ export function EliteLibraryClient({
 
   return (
     <PageShell
-      eyebrow="Coaching intelligence"
-      title="Elite pressure pattern library"
-      description="Observed patterns from reviewed elite clips, organized around repeated pressure behaviors and practical coaching translation."
+      eyebrow="Scouting and coaching intelligence"
+      title="Elite Library"
+      description="Reviewed pressure patterns, grouped by player and translated into practical coaching decisions. Counts describe the current evidence—not statistical certainty."
     >
-      <section className="overflow-hidden rounded-xl border border-slate-200 bg-slate-950 text-white shadow-sm">
-        <div className="grid gap-6 p-6 lg:grid-cols-[1fr_auto] lg:items-end">
+      <section className="elite-intro">
+        <div className="elite-intro__content">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">Current reviewed library</p>
-            <h2 className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight">Point rows are evidence. Repeated behavior is the coaching signal.</h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Profiles aggregate reviewed observations across pressure moments, while retaining every supporting point for inspection. Short points and long rallies are treated as different tactical windows, not as a value hierarchy.</p>
+            <p>Current reviewed library</p>
+            <h2>Point rows are evidence. Repeated behavior is the coaching signal.</h2>
+            <span>Profiles aggregate reviewed pressure moments while retaining each supporting point for inspection.</span>
           </div>
-          <div className="grid grid-cols-2 gap-3 text-center">
+          <dl className="elite-intro__metrics">
             <Metric value={approvedCount} label="approved points" />
             <Metric value={elitePressurePoints.length} label="reviewed rows" />
             <Metric value={`${approvedPercentage}%`} label="approved" />
-          </div>
+          </dl>
         </div>
-        <div className="h-1 bg-slate-800"><div className="h-full bg-emerald-500" style={{ width: `${approvedPercentage}%` }} /></div>
       </section>
 
-      <section className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="surface elite-filters" aria-labelledby="filter-heading">
+        <div className="elite-filters__head">
+          <div><h2 id="filter-heading">Shape the comparison</h2><p>Select a player first, then narrow the evidence by pressure context.</p></div>
+          <span>{filteredPoints.length} of {elitePressurePoints.length} observations · {visiblePercentage}%</span>
+        </div>
+        <div className="elite-filters__grid">
           <Filter label="Elite player" value={playerFilter} options={playerOptions} onChange={(value) => setPlayerFilter(value as PlayerFilter)} />
           <Filter label="Pressure trigger" value={triggerFilter} options={triggerOptions} onChange={(value) => setTriggerFilter(value as TriggerFilter)} />
           <Filter label="Surface" value={surfaceFilter} options={surfaceOptions} onChange={(value) => setSurfaceFilter(value as SurfaceFilter)} />
           <Filter label="Point type" value={pointTypeFilter} options={pointTypeOptions} onChange={(value) => setPointTypeFilter(value as PointTypeFilter)} />
         </div>
-        <p className="mt-4 text-sm text-slate-500">Profiles below reflect {filteredPoints.length} of {elitePressurePoints.length} observations ({visiblePercentage}%).</p>
       </section>
 
-      <section className="mt-8">
-        <div className="mb-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Pressure profiles</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">Repeated pressure behaviors</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Player-level summaries surface recurrence across the current reviewed evidence. Counts indicate observations, not statistical certainty.</p>
+      <section className="elite-profiles">
+        <div className="elite-profiles__head">
+          <h2>Repeated pressure behaviors</h2>
+          <p>Read the profile first. Open supporting evidence only when you need to inspect the observations behind it.</p>
         </div>
-        <div className="space-y-6">
+        <div className="elite-profiles__list">
           {visiblePlayers.map((player) => (
             <PressureProfile key={player} points={filteredPoints} player={player} />
           ))}
@@ -129,31 +130,32 @@ function PressureProfile({ points, player }: { points: ElitePressurePoint[]; pla
   const summary = getPlayerPressureSummary(points, player);
 
   return (
-    <article className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <header className="flex flex-col gap-4 border-b border-slate-200 bg-slate-50 p-5 md:flex-row md:items-center md:justify-between">
+    <article className="surface elite-profile">
+      <header className="elite-profile__header">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Observed across reviewed elite clips</p>
-          <h3 className="mt-1 text-2xl font-semibold text-slate-950">{player} pressure profile</h3>
+          <p>Observed across reviewed elite clips</p>
+          <h3>{player}</h3>
+          <span>Pressure profile</span>
         </div>
         <StatusBadge>{summary.approvedPoints} approved / reviewed points</StatusBadge>
       </header>
-      <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(18rem,1fr)]">
-        <section><h4 className="text-base font-semibold text-slate-950">Pressure Tendencies</h4><p className="mt-2 text-sm leading-7 text-slate-700">{summary.pressureTendencies}</p></section>
-        <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Dominant pattern family</p>
-          <h4 className="mt-1 font-semibold text-slate-950">{summary.dominantPatternFamily}</h4>
-          <div className="mt-3 space-y-2">{summary.patternFamilies.map((family) => <PatternFamilyBar key={family.label} family={family} total={summary.evidencePoints.length} />)}</div>
+      <div className="elite-profile__body">
+        <section className="elite-profile__tendency"><h4>Pressure Tendencies</h4><p>{summary.pressureTendencies}</p></section>
+        <section className="pattern-split">
+          <p>Pattern-family split</p>
+          <h4>{summary.dominantPatternFamily}</h4>
+          <div>{summary.patternFamilies.map((family) => <PatternFamilyBar key={family.label} family={family} total={summary.evidencePoints.length} />)}</div>
         </section>
       </div>
-      <div className="border-t border-slate-200 bg-emerald-50/60 p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-800">Coaching Takeaway</p>
+      <div className="elite-takeaway">
+        <p>Coaching Takeaway</p>
         <TextList items={summary.coachingTakeaways} columns />
       </div>
-      <details className="group border-t border-slate-200 bg-white">
-        <summary className="flex cursor-pointer list-none items-center justify-between p-5 text-sm font-semibold text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-600">
-          <span className="group-open:hidden">View Supporting Evidence</span><span className="hidden group-open:inline">Hide Supporting Evidence</span><span aria-hidden="true" className="text-emerald-700">+</span>
+      <details className="group elite-evidence">
+        <summary>
+          <span className="group-open:hidden">View Supporting Evidence</span><span className="hidden group-open:inline">Hide Supporting Evidence</span><span aria-hidden="true">+</span>
         </summary>
-        <div className="border-t border-slate-100 bg-slate-50 p-5">
+        <div className="detail-body elite-evidence__body">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Supporting Evidence · Current reviewed MVP library</p>
           <div className="mt-4 grid gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 lg:grid-cols-3">
             <ProfileCell title="Pressure triggers"><CountList items={summary.pressureTriggers} /></ProfileCell>
@@ -174,7 +176,7 @@ function PressureProfile({ points, player }: { points: ElitePressurePoint[]; pla
 
 function PatternFamilyBar({ family, total }: { family: CountedValue; total: number }) {
   const percentage = total ? Math.round((family.count / total) * 100) : 0;
-  return <div><div className="flex justify-between gap-3 text-xs text-slate-600"><span>{family.label}</span><span className="font-semibold">{percentage}%</span></div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-emerald-600" style={{ width: `${percentage}%` }} /></div></div>;
+  return <div className="pattern-bar"><div><span>{family.label}</span><strong className="tabular">{percentage}%</strong></div><div><span style={{ width: `${percentage}%` }} /></div></div>;
 }
 
 function getRallyPatterns(points: ElitePressurePoint[], minimum: number, maximum: number): CountedValue[] {
@@ -192,7 +194,7 @@ function EvidenceRow({ point }: { point: ElitePressurePoint }) {
     .join(" · ");
 
   return (
-    <details className="group rounded-lg border border-slate-200 bg-white shadow-sm">
+    <details className="group rounded-lg border border-slate-200 bg-white">
       <summary className="flex cursor-pointer list-none flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
@@ -220,25 +222,25 @@ function EvidenceRow({ point }: { point: ElitePressurePoint }) {
 }
 
 function Metric({ value, label }: { value: number | string; label: string }) {
-  return <div className="min-w-28 rounded-lg border border-slate-700 bg-slate-900 p-3"><p className="text-2xl font-semibold">{value}</p><p className="mt-1 text-xs text-slate-400">{label}</p></div>;
+  return <div><dd className="tabular">{value}</dd><dt>{label}</dt></div>;
 }
 
 function Filter({ label, value, options, onChange }: { label: string; value: string; options: readonly string[]; onChange: (value: string) => void }) {
-  return <label><span className="text-sm font-semibold text-slate-700">{label}</span><select value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100">{options.map((option) => <option key={option}>{option}</option>)}</select></label>;
+  return <label><span className="field-label">{label}</span><select value={value} onChange={(event) => onChange(event.target.value)} className="field-control">{options.map((option) => <option key={option}>{option}</option>)}</select></label>;
 }
 
 function ProfileCell({ title, kicker, children }: { title: string; kicker?: string; children: React.ReactNode }) {
-  return <div className="min-h-44 bg-white p-5">{kicker && <p className="text-xs font-medium text-slate-500">{kicker}</p>}<h4 className={`${kicker ? "mt-1" : ""} text-sm font-semibold text-slate-950`}>{title}</h4><div className="mt-3">{children}</div></div>;
+  return <div className="min-h-44 bg-white p-5">{kicker && <p className="text-xs font-medium text-slate-600">{kicker}</p>}<h4 className={`${kicker ? "mt-1" : ""} text-sm font-semibold text-slate-950`}>{title}</h4><div className="mt-3">{children}</div></div>;
 }
 
 function CountList({ items, empty = "No repeated observation in this view." }: { items: CountedValue[]; empty?: string }) {
-  if (!items.length) return <p className="text-sm text-slate-500">{empty}</p>;
+  if (!items.length) return <p className="text-sm text-slate-600">{empty}</p>;
   return <ul className="space-y-2">{items.map((item) => <li key={item.label} className="flex items-start justify-between gap-3 text-sm leading-5 text-slate-700"><span>{item.label}</span><span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">{item.count}×</span></li>)}</ul>;
 }
 
 function TextList({ items, columns = false }: { items: string[]; columns?: boolean }) {
-  if (!items.length) return <p className="text-sm text-slate-500">No reviewed observation in this view.</p>;
-  return <ul className={`${columns ? "mt-3 grid gap-3 md:grid-cols-2" : "space-y-2"}`}>{items.map((item) => <li key={item} className="flex items-start gap-2 text-sm leading-6 text-slate-700"><span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-600" />{item}</li>)}</ul>;
+  if (!items.length) return <p className="text-list-empty">No reviewed observation in this view.</p>;
+  return <ul className={`${columns ? "mt-3 grid gap-3 md:grid-cols-2" : "space-y-2"} text-list`}>{items.map((item) => <li key={item}><span aria-hidden="true" />{item}</li>)}</ul>;
 }
 
 function TagList({ items }: { items: string[] }) {
@@ -246,8 +248,8 @@ function TagList({ items }: { items: string[] }) {
 }
 
 function StatusBadge({ children, tone = "green" }: { children: React.ReactNode; tone?: "green" | "slate" | "amber" }) {
-  const tones = { green: "bg-emerald-100 text-emerald-800", slate: "bg-slate-200 text-slate-700", amber: "bg-amber-100 text-amber-800" };
-  return <span className={`rounded-full px-2.5 py-1 ${tones[tone]}`}>{children}</span>;
+  const tones = { green: "status-success", slate: "status-neutral", amber: "status-warning" };
+  return <span className={`status ${tones[tone]}`}>{children}</span>;
 }
 
 function DataField({ label, value, wide = false }: { label: string; value: string; wide?: boolean }) {
