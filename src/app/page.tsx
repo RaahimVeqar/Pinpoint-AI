@@ -25,6 +25,31 @@ export default function Home() {
   return (
     <div className="home-page">
       <section className="home-hero">
+        <div className="home-hero__court" aria-hidden="true">
+          <span className="home-hero__court-net" />
+          <span className="home-hero__court-center" />
+          <span className="home-hero__court-singles home-hero__court-singles--near" />
+          <span className="home-hero__court-singles home-hero__court-singles--far" />
+          <span className="home-hero__court-service home-hero__court-service--near" />
+          <span className="home-hero__court-service home-hero__court-service--far" />
+          <svg
+            className="home-hero__shot-path"
+            viewBox="0 0 780 360"
+            preserveAspectRatio="none"
+          >
+            <path d="M 74 268 C 186 253 238 110 354 126 S 558 278 704 88" />
+            <circle cx="74" cy="268" r="6" />
+            <circle cx="354" cy="126" r="6" />
+            <circle cx="704" cy="88" r="6" />
+          </svg>
+          <span className="home-hero__court-reading home-hero__court-reading--path">
+            Shot path 03
+          </span>
+          <span className="home-hero__court-reading home-hero__court-reading--decision">
+            Decision zone
+          </span>
+        </div>
+
         <div className="home-hero__copy">
           <p className="home-hero__category">AI-assisted tennis pressure analysis</p>
           <h1>Analyzing the moments that decide outcomes.</h1>
@@ -48,9 +73,6 @@ export default function Home() {
         </div>
 
         <div className="pressure-board" aria-label="Example pressure analysis">
-          <div className="pressure-board__court" aria-hidden="true">
-            <span />
-          </div>
           <div className="pressure-board__header">
             <div>
               <p>Pressure point review</p>
