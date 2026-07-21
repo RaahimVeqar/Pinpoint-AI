@@ -8,6 +8,7 @@ Supabase CSV import is manual for this integration step. The database stores poi
 2. Open **SQL Editor** and create a new query.
 3. Copy the full contents of `supabase/migrations/001_create_elite_pressure_points.sql` into the query.
 4. Run the query and confirm that it completes successfully.
+
 ## Import the reviewed dataset
 
 1. Open **Table Editor**.
