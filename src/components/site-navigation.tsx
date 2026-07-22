@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { signOutAction } from "@/app/auth/actions";
+
 const primaryItems = [
   { href: "/", label: "Home" },
   { href: "/players", label: "Players" },
@@ -28,7 +30,11 @@ function isCurrent(pathname: string, href: string) {
   return href === "/" ? pathname === href : pathname.startsWith(href);
 }
 
-export function SiteNavigation() {
+type SiteNavigationProps = {
+  isAuthenticated: boolean;
+};
+
+export function SiteNavigation({ isAuthenticated }: SiteNavigationProps) {
   const pathname = usePathname();
   const builderIsActive = builderItems.some((item) =>
     isCurrent(pathname, item.href),
@@ -80,30 +86,47 @@ export function SiteNavigation() {
             })}
           </div>
 
-          <details className="builder-menu">
-            <summary
-              className={`nav-link builder-menu__trigger ${builderIsActive ? "nav-link--active" : ""}`}
-            >
-              Builder
-              <span aria-hidden="true" className="builder-menu__chevron">⌄</span>
-            </summary>
-            <div className="builder-menu__panel">
-              <p>Internal tools</p>
-              {builderItems.map((item) => {
-                const active = isCurrent(pathname, item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    className={active ? "builder-link builder-link--active" : "builder-link"}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </details>
+          <div className="primary-nav__actions">
+            <details className="builder-menu">
+              <summary
+                className={`nav-link builder-menu__trigger ${builderIsActive ? "nav-link--active" : ""}`}
+              >
+                Builder
+                <span aria-hidden="true" className="builder-menu__chevron">⌄</span>
+              </summary>
+              <div className="builder-menu__panel">
+                <p>Internal tools</p>
+                {builderItems.map((item) => {
+                  const active = isCurrent(pathname, item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      className={active ? "builder-link builder-link--active" : "builder-link"}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </details>
+
+            {isAuthenticated ? (
+              <form action={signOutAction}>
+                <button className="nav-link nav-auth-control" type="submit">
+                  Sign out
+                </button>
+              </form>
+            ) : (
+              <Link
+                href="/sign-in"
+                className={`nav-link ${pathname === "/sign-in" ? "nav-link--active" : ""}`}
+              >
+                Sign in
+              </Link>
+            )}
+          </div>
         </nav>
       </div>
     </header>

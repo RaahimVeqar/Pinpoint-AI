@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { requireRepositoryData } from "@/lib/repositories/player-clip-repository";
+import { getAuthenticatedUserId } from "@/lib/supabase/authenticated-server";
 
 export type AnalysisDraftStatus =
   | "draft"
@@ -51,7 +52,7 @@ type AnalysisDraftWritableFields = Omit<
 
 export type UpsertAnalysisDraftInput = Pick<
   AnalysisDraftWritableFields,
-  "clip_id" | "created_by"
+  "clip_id"
 > &
   Partial<
     Omit<AnalysisDraftWritableFields, "clip_id" | "created_by">
@@ -102,9 +103,13 @@ export async function upsertAnalysisDraft(
   supabase: SupabaseClient,
   input: UpsertAnalysisDraftInput,
 ): Promise<AnalysisDraftRow> {
+  const authenticatedUserId = await getAuthenticatedUserId(supabase);
   const { data, error } = await supabase
     .from("analysis_drafts")
-    .upsert(input, { onConflict: "clip_id" })
+    .upsert(
+      { ...input, created_by: authenticatedUserId },
+      { onConflict: "clip_id" },
+    )
     .select(ANALYSIS_DRAFT_COLUMNS)
     .single();
 

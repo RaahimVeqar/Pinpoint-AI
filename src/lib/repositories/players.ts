@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { requireRepositoryData } from "@/lib/repositories/player-clip-repository";
+import { getAuthenticatedUserId } from "@/lib/supabase/authenticated-server";
 
 export type PlayerStatus = "active" | "inactive" | "archived";
 
@@ -17,10 +18,7 @@ export type PlayerRow = {
   updated_at: string;
 };
 
-export type CreatePlayerInput = Pick<
-  PlayerRow,
-  "display_name" | "created_by"
-> &
+export type CreatePlayerInput = Pick<PlayerRow, "display_name"> &
   Partial<Pick<PlayerRow, "dominant_hand" | "notes" | "status">>;
 
 export type UpdatePlayerInput = Partial<
@@ -70,9 +68,10 @@ export async function createPlayer(
   supabase: SupabaseClient,
   input: CreatePlayerInput,
 ): Promise<PlayerRow> {
+  const authenticatedUserId = await getAuthenticatedUserId(supabase);
   const { data, error } = await supabase
     .from("players")
-    .insert(input)
+    .insert({ ...input, created_by: authenticatedUserId })
     .select(PLAYER_COLUMNS)
     .single();
 

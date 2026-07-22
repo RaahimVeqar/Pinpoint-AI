@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { requireRepositoryData } from "@/lib/repositories/player-clip-repository";
+import { getAuthenticatedUserId } from "@/lib/supabase/authenticated-server";
 
 export type MatchSessionStatus =
   | "draft"
@@ -27,7 +28,7 @@ export type MatchSessionRow = {
 
 export type CreateMatchSessionInput = Pick<
   MatchSessionRow,
-  "player_id" | "title" | "created_by"
+  "player_id" | "title"
 > &
   Partial<
     Pick<
@@ -96,9 +97,10 @@ export async function createMatchSession(
   supabase: SupabaseClient,
   input: CreateMatchSessionInput,
 ): Promise<MatchSessionRow> {
+  const authenticatedUserId = await getAuthenticatedUserId(supabase);
   const { data, error } = await supabase
     .from("match_sessions")
-    .insert(input)
+    .insert({ ...input, created_by: authenticatedUserId })
     .select(MATCH_SESSION_COLUMNS)
     .single();
 

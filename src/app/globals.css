@@ -366,6 +366,16 @@ textarea.field-control {
   gap: 0.25rem;
 }
 
+.primary-nav__actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.primary-nav__actions form { margin: 0; }
+.nav-auth-control { cursor: pointer; font-family: inherit; }
+
 .nav-link {
   position: relative;
   display: inline-flex;
@@ -434,6 +444,44 @@ textarea.field-control {
 
 details > summary::-webkit-details-marker { display: none; }
 details[open] .detail-body { animation: detail-in 180ms var(--ease-out); }
+
+.auth-page {
+  display: grid;
+  width: 100%;
+  max-width: 62rem;
+  margin: auto;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.auth-intro { max-width: 36rem; }
+.auth-intro h1 {
+  max-width: 16ch;
+  margin: 0;
+  color: var(--ink);
+  font-size: 2.25rem;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.auth-intro > p:last-child {
+  max-width: 55ch;
+  margin: 1rem 0 0;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.auth-panel { padding: 1.5rem; }
+.auth-panel header { padding-bottom: 1.25rem; border-bottom: 1px solid var(--line); }
+.auth-panel h2 { margin: 0; font-size: 1.25rem; font-weight: 650; letter-spacing: -0.02em; }
+.auth-panel header p { margin: 0.45rem 0 0; color: var(--muted); font-size: 0.875rem; line-height: 1.55; }
+.auth-form { display: flex; margin-top: 1.5rem; flex-direction: column; gap: 1rem; }
+.auth-error { margin: 0; border-radius: var(--radius-md); background: var(--rose-soft); padding: 0.75rem 0.85rem; color: #842433; font-size: 0.875rem; line-height: 1.5; }
+.auth-submit { width: 100%; gap: 0.55rem; margin-top: 0.25rem; }
+.auth-form__note { margin: 0; color: var(--muted); font-size: 0.75rem; line-height: 1.55; text-align: center; }
 
 .home-page { display: flex; flex-direction: column; gap: 5rem; }
 .home-hero {
@@ -909,6 +957,8 @@ details[open] .detail-body { animation: detail-in 180ms var(--ease-out); }
   .player-profile__links { grid-template-columns: 0.7fr 0.7fr 1.6fr; }
   .player-profile__links div + div { border-top: 0; border-left: 1px solid var(--line); }
   .player-evidence__list article { grid-template-columns: 10rem minmax(0, 1fr) auto; }
+  .auth-page { grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr); }
+  .auth-panel { padding: 2rem; }
 }
 
 @media (max-width: 1023px) {
@@ -938,6 +988,10 @@ details[open] .detail-body { animation: detail-in 180ms var(--ease-out); }
   }
   .primary-nav__scroll::-webkit-scrollbar { display: none; }
   .builder-menu__trigger { padding-inline: 0.55rem; }
+  .primary-nav__actions { gap: 0; }
+  .primary-nav__actions .nav-link { padding-inline: 0.5rem; }
+  .auth-page { gap: 2rem; }
+  .auth-intro h1 { font-size: 1.875rem; }
   .home-page { gap: 3.75rem; }
   .home-hero {
     min-height: auto;

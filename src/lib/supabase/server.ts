@@ -6,8 +6,7 @@ export function createServerSupabaseClient(): SupabaseClient {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabasePublishableKey =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  console.log(supabaseUrl);
-  console.log(supabasePublishableKey);
+
   if (!supabaseUrl || !supabasePublishableKey) {
     throw new Error("Supabase public environment variables are not configured.");
   }

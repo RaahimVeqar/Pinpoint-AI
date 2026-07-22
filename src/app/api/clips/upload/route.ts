@@ -33,7 +33,7 @@ type PressureTrigger = (typeof PRESSURE_TRIGGERS)[number];
 export async function POST(request: Request) {
   try {
     const { supabase, user } =
-      await requireAuthenticatedSupabaseClient(request);
+      await requireAuthenticatedSupabaseClient();
     const formData = await readFormData(request);
     const file = requireFile(formData, "file");
     const mimeType = validatePrivateClip(file);
@@ -72,7 +72,6 @@ export async function POST(request: Request) {
       player_point_outcome: readPlayerPointOutcome(formData),
       coach_note: readOptionalText(formData, "coachNote", 5000),
       upload_status: "pending",
-      created_by: user.id,
     });
 
     try {

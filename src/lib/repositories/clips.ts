@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { requireRepositoryData } from "@/lib/repositories/player-clip-repository";
+import { getAuthenticatedUserId } from "@/lib/supabase/authenticated-server";
 
 export type ClipUploadStatus = "pending" | "uploading" | "ready" | "failed";
 export type ClipAnalysisStatus =
@@ -50,7 +51,6 @@ export type CreateClipInput = Pick<
   | "original_file_name"
   | "mime_type"
   | "file_size_bytes"
-  | "created_by"
 > &
   Partial<
     Pick<
@@ -144,9 +144,10 @@ export async function createClip(
   supabase: SupabaseClient,
   input: CreateClipInput,
 ): Promise<ClipRow> {
+  const authenticatedUserId = await getAuthenticatedUserId(supabase);
   const { data, error } = await supabase
     .from("clips")
-    .insert(input)
+    .insert({ ...input, created_by: authenticatedUserId })
     .select(CLIP_COLUMNS)
     .single();
 

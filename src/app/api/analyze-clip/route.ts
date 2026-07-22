@@ -5,6 +5,10 @@ import type {
   PressureTrigger,
   ServeOrReturn,
 } from "@/lib/pinpoint-types";
+import {
+  requireAuthenticatedUser,
+  SupabaseAuthenticationError,
+} from "@/lib/supabase/authenticated-server";
 
 type AnalyzeClipRequest = {
   playerName?: string;
@@ -242,7 +246,9 @@ function createMockAnalysis(input: AnalyzeClipRequest): AnalysisDraftResponse {
 }
 
 export async function POST(request: Request) {
-  const input = (await request.json()) as AnalyzeClipRequest;
+  try {
+    await requireAuthenticatedUser();
+    const input = (await request.json()) as AnalyzeClipRequest;
 
   /*
    * This endpoint is intentionally mocked for the current prototype.
@@ -255,5 +261,15 @@ export async function POST(request: Request) {
    * No API keys, external AI services, Supabase, auth, uploads, or file storage
    * are used here.
    */
-  return NextResponse.json(createMockAnalysis(input));
+    return NextResponse.json(createMockAnalysis(input));
+  } catch (error) {
+    if (error instanceof SupabaseAuthenticationError) {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
+
+    return NextResponse.json(
+      { error: "Unable to generate the prototype analysis." },
+      { status: 400 },
+    );
+  }
 }

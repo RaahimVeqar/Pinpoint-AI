@@ -6,6 +6,7 @@ import {
   requireRepositoryData,
   throwIfRepositoryFailure,
 } from "@/lib/repositories/player-clip-repository";
+import { getAuthenticatedUserId } from "@/lib/supabase/authenticated-server";
 
 export type ReportStatus = "draft" | "finalized" | "archived";
 
@@ -43,7 +44,7 @@ type ReportWritableFields = Omit<ReportRow, "id" | "created_at" | "updated_at">;
 
 export type CreateReportInput = Pick<
   ReportWritableFields,
-  "player_id" | "title" | "created_by"
+  "player_id" | "title"
 > &
   Partial<Omit<ReportWritableFields, "player_id" | "title" | "created_by">>;
 
@@ -53,7 +54,7 @@ export type UpdateReportInput = Partial<
 
 export type AttachReportClipInput = Pick<
   ReportClipRow,
-  "report_id" | "clip_id" | "created_by"
+  "report_id" | "clip_id"
 > &
   Partial<Pick<ReportClipRow, "analysis_draft_id" | "display_order" | "status">>;
 
@@ -97,9 +98,10 @@ export async function createReport(
   supabase: SupabaseClient,
   input: CreateReportInput,
 ): Promise<ReportRow> {
+  const authenticatedUserId = await getAuthenticatedUserId(supabase);
   const { data, error } = await supabase
     .from("reports")
-    .insert(input)
+    .insert({ ...input, created_by: authenticatedUserId })
     .select(REPORT_COLUMNS)
     .single();
 
@@ -151,9 +153,10 @@ export async function attachReportClip(
   supabase: SupabaseClient,
   input: AttachReportClipInput,
 ): Promise<ReportClipRow> {
+  const authenticatedUserId = await getAuthenticatedUserId(supabase);
   const { data, error } = await supabase
     .from("report_clips")
-    .insert(input)
+    .insert({ ...input, created_by: authenticatedUserId })
     .select(REPORT_CLIP_COLUMNS)
     .single();
 

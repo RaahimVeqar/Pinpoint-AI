@@ -1,13 +1,11 @@
 import "server-only";
 
-import {
-  createClient,
-  type SupabaseClient,
-  type User,
-} from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
 export class SupabaseAuthenticationError extends Error {
-  constructor(message = "A valid Supabase access token is required.") {
+  constructor(message = "You must be signed in to continue.") {
     super(message);
     this.name = "SupabaseAuthenticationError";
   }
@@ -18,21 +16,7 @@ export type AuthenticatedSupabaseContext = {
   user: User;
 };
 
-export async function requireAuthenticatedSupabaseClient(
-  request: Request,
-): Promise<AuthenticatedSupabaseContext> {
-  const accessToken = readBearerToken(request.headers.get("authorization"));
-  const supabase = createUserScopedSupabaseClient(accessToken);
-  const { data, error } = await supabase.auth.getUser(accessToken);
-
-  if (error || !data.user) {
-    throw new SupabaseAuthenticationError();
-  }
-
-  return { supabase, user: data.user };
-}
-
-function createUserScopedSupabaseClient(accessToken: string): SupabaseClient {
+export async function createAuthenticatedServerClient(): Promise<SupabaseClient> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
@@ -40,20 +24,54 @@ function createUserScopedSupabaseClient(accessToken: string): SupabaseClient {
     throw new Error("Supabase public environment variables are not configured.");
   }
 
-  return createClient(supabaseUrl, publishableKey, {
-    global: {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    },
-    auth: {
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-      persistSession: false,
+  const cookieStore = await cookies();
+
+  return createServerClient(supabaseUrl, publishableKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+          });
+        } catch {
+          // Server Components cannot write cookies. The proxy refreshes them.
+        }
+      },
     },
   });
 }
 
-function readBearerToken(authorization: string | null): string {
-  const match = authorization?.match(/^Bearer\s+([^\s]+)$/i);
-  if (!match) throw new SupabaseAuthenticationError();
-  return match[1];
+export async function getAuthenticatedUser(
+  supabase?: SupabaseClient,
+): Promise<User | null> {
+  const client = supabase ?? (await createAuthenticatedServerClient());
+  const { data, error } = await client.auth.getUser();
+
+  if (error || !data.user) return null;
+  return data.user;
+}
+
+export async function getAuthenticatedUserId(
+  supabase?: SupabaseClient,
+): Promise<string> {
+  const user = await getAuthenticatedUser(supabase);
+  if (!user) throw new SupabaseAuthenticationError();
+  return user.id;
+}
+
+export async function requireAuthenticatedUser(
+  supabase?: SupabaseClient,
+): Promise<AuthenticatedSupabaseContext> {
+  const client = supabase ?? (await createAuthenticatedServerClient());
+  const user = await getAuthenticatedUser(client);
+
+  if (!user) throw new SupabaseAuthenticationError();
+  return { supabase: client, user };
+}
+
+export async function requireAuthenticatedSupabaseClient(): Promise<AuthenticatedSupabaseContext> {
+  return requireAuthenticatedUser();
 }

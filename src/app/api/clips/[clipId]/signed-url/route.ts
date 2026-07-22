@@ -13,9 +13,9 @@ import {
 
 type RouteContext = { params: Promise<{ clipId: string }> };
 
-export async function GET(request: Request, context: RouteContext) {
+export async function GET(_request: Request, context: RouteContext) {
   try {
-    const { supabase } = await requireAuthenticatedSupabaseClient(request);
+    const { supabase } = await requireAuthenticatedSupabaseClient();
     const { clipId } = await context.params;
     const clip = await getClipById(supabase, clipId);
 
