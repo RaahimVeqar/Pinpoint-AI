@@ -1,109 +1,165 @@
 import Link from "next/link";
+
+import { MatchSessionCreateForm } from "@/app/matches/match-session-create-form";
+import { SavedClipPlayback } from "@/app/matches/saved-clip-playback";
 import { PageShell } from "@/components/page-shell";
-import {
-  savedClipAnalyses,
-  savedPlayerClips,
-  savedPlayerReports,
-} from "@/lib/player-clip-data";
+import { listClips } from "@/lib/repositories/clips";
+import { listMatchSessions } from "@/lib/repositories/match-sessions";
+import { listPlayers } from "@/lib/repositories/players";
+import { requireAuthenticatedSupabaseClient } from "@/lib/supabase/authenticated-server";
 
-export default function MatchesPage() {
-  const sessions = Array.from(new Set(savedPlayerClips.map((clip) => clip.matchSession))).map((matchSession) => {
-    const clips = savedPlayerClips.filter((clip) => clip.matchSession === matchSession);
-    const report = savedPlayerReports.find((item) => item.matchSession === matchSession);
-    return { matchSession, playerName: clips[0]?.playerName ?? "Unknown player", clips, report };
-  });
+export const dynamic = "force-dynamic";
 
-  const analysisByClipId = new Map(savedClipAnalyses.map((analysis) => [analysis.clipId, analysis]));
-  const reviewedClips = savedClipAnalyses.filter((analysis) => analysis.reviewStatus !== "Needs Review").length;
+export default async function MatchesPage() {
+  const { supabase } = await requireAuthenticatedSupabaseClient();
+  const [players, matchSessions, clips] = await Promise.all([
+    listPlayers(supabase),
+    listMatchSessions(supabase),
+    listClips(supabase),
+  ]);
+  const activePlayers = players
+    .filter((player) => player.status === "active")
+    .map((player) => ({ id: player.id, name: player.display_name }));
+  const playerNames = new Map(
+    players.map((player) => [player.id, player.display_name]),
+  );
+  const visibleSessions = matchSessions.filter(
+    (session) => session.status !== "archived",
+  );
+  const readyClips = clips.filter((clip) => clip.upload_status === "ready");
+  const sessionsWithClips = new Set(clips.map((clip) => clip.match_session_id));
 
   return (
     <PageShell
-      eyebrow="Analyzed clip evidence"
+      eyebrow="Private match evidence"
       title="Matches / Saved Clips"
-      description="A review library organized around players and sessions, with the analysis state and report readiness visible before opening a clip."
+      description="Create the required session context, then keep each owned clip connected to the player and match where it belongs."
     >
+      <MatchSessionCreateForm players={activePlayers} />
+
       <div className="library-summary" aria-label="Saved clip library summary">
-        <div><strong className="tabular">{sessions.length}</strong><span>match / training sessions</span></div>
-        <div><strong className="tabular">{savedPlayerClips.length}</strong><span>saved clip moments</span></div>
-        <div><strong className="tabular">{reviewedClips}</strong><span>coach-reviewed analyses</span></div>
-        <Link href="/tagging" className="button-primary">Analyze another clip <span aria-hidden="true">→</span></Link>
+        <div><strong className="tabular">{visibleSessions.length}</strong><span>match / training sessions</span></div>
+        <div><strong className="tabular">{readyClips.length}</strong><span>private clips ready</span></div>
+        <div><strong className="tabular">{sessionsWithClips.size}</strong><span>sessions with evidence</span></div>
+        <Link href="/clips/upload" className="button-primary">Upload a private clip <span aria-hidden="true">→</span></Link>
       </div>
 
-      <p className="notice">Prototype library data is shown here. The Supabase persistence layer is intentionally unchanged in this visual refinement.</p>
+      {visibleSessions.length === 0 ? (
+        <section className="surface workflow-empty" aria-labelledby="empty-sessions-heading">
+          <h2 id="empty-sessions-heading">No match sessions yet</h2>
+          <p>Create the first session above. It will immediately become available in the private upload workflow.</p>
+        </section>
+      ) : (
+        <div className="match-library">
+          {visibleSessions.map((session) => {
+            const sessionClips = clips.filter(
+              (clip) => clip.match_session_id === session.id,
+            );
+            return (
+              <article key={session.id} className="surface match-session">
+                <header className="match-session__header">
+                  <div>
+                    <p>{playerNames.get(session.player_id) ?? "Owned player"}</p>
+                    <h2>{session.title}</h2>
+                    <span>{formatSessionContext(session)}</span>
+                  </div>
+                  <div className="match-session__readiness">
+                    <span className="status status-neutral">{formatStatus(session.status)}</span>
+                    <span className={sessionClips.length ? "status status-success" : "status status-warning"}>
+                      {sessionClips.length
+                        ? `${sessionClips.length} clip${sessionClips.length === 1 ? "" : "s"}`
+                        : "Awaiting clips"}
+                    </span>
+                  </div>
+                </header>
 
-      <div className="match-library">
-        {sessions.map((session) => (
-          <article key={session.matchSession} className="surface match-session">
-            <header className="match-session__header">
-              <div>
-                <p>{session.playerName}</p>
-                <h2>{session.matchSession}</h2>
-                <span>{session.clips.length} analyzed clip{session.clips.length === 1 ? "" : "s"}</span>
-              </div>
-              <div className="match-session__readiness">
-                <span className="status status-success">Analysis saved</span>
-                <span className={`status ${session.report ? "status-success" : "status-warning"}`}>
-                  {session.report ? "Report ready" : "Review pending"}
-                </span>
-              </div>
-            </header>
-
-            <div className="clip-list">
-              {session.clips.map((clip) => {
-                const analysis = analysisByClipId.get(clip.id);
-                const needsReview = analysis?.reviewStatus === "Needs Review";
-                return (
-                  <details key={clip.id} className="clip-row">
-                    <summary>
-                      <div className="clip-row__identity">
-                        <span className="clip-row__time tabular">{clip.timestampOrRange}</span>
-                        <div>
-                          <h3>{clip.clipTitle}</h3>
-                          <p>{clip.scoreContext}</p>
+                {sessionClips.length === 0 ? (
+                  <p className="match-session__empty">No private clips are linked to this session yet.</p>
+                ) : (
+                  <div className="clip-list">
+                    {sessionClips.map((clip) => (
+                      <details key={clip.id} className="clip-row">
+                        <summary>
+                          <div className="clip-row__identity">
+                            <span className="clip-row__time tabular">
+                              {clip.timestamp_or_range || "Full clip"}
+                            </span>
+                            <div>
+                              <h3>{clip.title}</h3>
+                              <p>{clip.score_context || clip.original_file_name}</p>
+                            </div>
+                          </div>
+                          <div className="clip-row__signals">
+                            <span>{formatBytes(clip.file_size_bytes)}</span>
+                            <span className={clip.upload_status === "ready" ? "status status-success" : "status status-warning"}>
+                              {formatStatus(clip.upload_status)}
+                            </span>
+                            <b aria-hidden="true">+</b>
+                          </div>
+                        </summary>
+                        <div className="detail-body clip-detail">
+                          <dl className="clip-detail__context">
+                            <div><dt>Player</dt><dd>{playerNames.get(clip.player_id) ?? "Owned player"}</dd></div>
+                            <div><dt>Pressure trigger</dt><dd>{clip.pressure_trigger || "Not specified"}</dd></div>
+                            <div><dt>Point outcome</dt><dd>{clip.player_point_outcome || "Not specified"}</dd></div>
+                            <div><dt>Review state</dt><dd>{formatStatus(clip.review_status)}</dd></div>
+                          </dl>
+                          <SavedClipPlayback
+                            clipId={clip.id}
+                            isReady={clip.upload_status === "ready"}
+                            title={clip.title}
+                          />
                         </div>
-                      </div>
-                      <div className="clip-row__signals">
-                        <span>{clip.pointPatternFamily}</span>
-                        <span className={`status ${clip.playerPointOutcome === "Won" ? "status-success" : "status-danger"}`}>{clip.playerPointOutcome}</span>
-                        <span className={`status ${needsReview ? "status-warning" : "status-success"}`}>{analysis?.reviewStatus ?? "Draft"}</span>
-                        <b aria-hidden="true">+</b>
-                      </div>
-                    </summary>
+                      </details>
+                    ))}
+                  </div>
+                )}
 
-                    <div className="detail-body clip-detail">
-                      <dl className="clip-detail__context">
-                        <div><dt>Player</dt><dd>{clip.playerName}</dd></div>
-                        <div><dt>Pressure trigger</dt><dd>{clip.pressureTrigger}</dd></div>
-                        <div><dt>Point outcome</dt><dd>{clip.playerPointOutcome}</dd></div>
-                        <div><dt>Saved evidence</dt><dd>{clip.clipSource}</dd></div>
-                      </dl>
-
-                      {analysis ? (
-                        <div className="clip-detail__analysis">
-                          <div className="clip-detail__lead"><h4>What happened</h4><p>{analysis.whatHappened}</p></div>
-                          <div><h4>Breakdown moment</h4><p>{analysis.likelyBreakdownMoment}</p></div>
-                          <div><h4>Elite comparison</h4><p>{analysis.eliteComparison}</p></div>
-                          <div><h4>Next-time adjustment</h4><p>{analysis.nextTimeAdjustment}</p></div>
-                          <div><h4>Training focus</h4><p>{analysis.trainingFocus}</p></div>
-                        </div>
-                      ) : (
-                        <p className="notice">No saved analysis is linked to this clip yet.</p>
-                      )}
-                    </div>
-                  </details>
-                );
-              })}
-            </div>
-
-            {session.report && (
-              <footer className="match-session__report">
-                <div><span>Report snapshot</span><p>{session.report.overallPressureTendency}</p><strong>Next session: {session.report.nextSessionFocus}</strong></div>
-                <Link href="/reports" className="button-secondary">Open report</Link>
-              </footer>
-            )}
-          </article>
-        ))}
-      </div>
+                {session.notes && (
+                  <footer className="match-session__report">
+                    <div><span>Session notes</span><p>{session.notes}</p></div>
+                  </footer>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      )}
     </PageShell>
   );
+}
+
+function formatSessionContext(session: {
+  event_name: string | null;
+  opponent: string | null;
+  session_date: string | null;
+  surface: string | null;
+}): string {
+  return [
+    session.event_name,
+    session.opponent ? `vs ${session.opponent}` : null,
+    formatDate(session.session_date),
+    session.surface,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function formatDate(value: string | null): string | null {
+  if (!value) return null;
+  return new Intl.DateTimeFormat("en", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${value}T00:00:00Z`));
+}
+
+function formatStatus(value: string): string {
+  return value.replaceAll("_", " ");
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }

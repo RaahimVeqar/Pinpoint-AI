@@ -1,15 +1,19 @@
 import { NextResponse } from "next/server";
 
-import { createClip, updateClip } from "@/lib/repositories/clips";
+import { createClip } from "@/lib/repositories/clips";
 import { getMatchSessionById } from "@/lib/repositories/match-sessions";
 import { PlayerClipRepositoryError } from "@/lib/repositories/player-clip-repository";
+import { getPlayerById } from "@/lib/repositories/players";
 import {
   requireAuthenticatedSupabaseClient,
   SupabaseAuthenticationError,
 } from "@/lib/supabase/authenticated-server";
 import {
   ClipStorageError,
+  MAX_CLIP_FILE_BYTES,
   createPrivateClipPath,
+  removePrivateClip,
+  sanitizeClipFileName,
   uploadPrivateClip,
   validatePrivateClip,
 } from "@/lib/supabase/clip-storage";
@@ -30,17 +34,28 @@ const PRESSURE_TRIGGERS = [
 
 type PressureTrigger = (typeof PRESSURE_TRIGGERS)[number];
 
+const MAX_MULTIPART_OVERHEAD_BYTES = 1024 * 1024;
+
 export async function POST(request: Request) {
   try {
+    assertSameOrigin(request);
+    assertRequestSize(request);
     const { supabase, user } =
       await requireAuthenticatedSupabaseClient();
     const formData = await readFormData(request);
     const file = requireFile(formData, "file");
-    const mimeType = validatePrivateClip(file);
+    const mimeType = await validatePrivateClip(file);
     const playerId = requireUuid(formData, "playerId");
     const matchSessionId = requireUuid(formData, "matchSessionId");
     const title = requireText(formData, "title", 200);
-    const matchSession = await getMatchSessionById(supabase, matchSessionId);
+    const [player, matchSession] = await Promise.all([
+      getPlayerById(supabase, playerId),
+      getMatchSessionById(supabase, matchSessionId),
+    ]);
+
+    if (!player) {
+      return NextResponse.json({ error: "Player not found." }, { status: 404 });
+    }
 
     if (!matchSession) {
       return NextResponse.json(
@@ -56,46 +71,82 @@ export async function POST(request: Request) {
       );
     }
 
-    const storagePath = createPrivateClipPath(user.id, file.name);
-    const clip = await createClip(supabase, {
-      player_id: playerId,
-      match_session_id: matchSessionId,
-      title,
-      storage_bucket: "player-clips",
-      storage_path: storagePath,
-      original_file_name: file.name,
-      mime_type: mimeType,
-      file_size_bytes: file.size,
-      timestamp_or_range: readOptionalText(formData, "timestampOrRange", 100),
-      score_context: readOptionalText(formData, "scoreContext", 200),
-      pressure_trigger: readPressureTrigger(formData),
-      player_point_outcome: readPlayerPointOutcome(formData),
-      coach_note: readOptionalText(formData, "coachNote", 5000),
-      upload_status: "pending",
-    });
+    const originalFileName = sanitizeClipFileName(file.name);
+    const storagePath = createPrivateClipPath(
+      user.id,
+      matchSessionId,
+      originalFileName,
+    );
+    await uploadPrivateClip(supabase, storagePath, file);
 
     try {
-      await updateClip(supabase, clip.id, { upload_status: "uploading" });
-      await uploadPrivateClip(supabase, storagePath, file);
-      const readyClip = await updateClip(supabase, clip.id, {
-        upload_error: null,
+      const readyClip = await createClip(supabase, {
+        player_id: playerId,
+        match_session_id: matchSessionId,
+        title,
+        storage_bucket: "player-clips",
+        storage_path: storagePath,
+        original_file_name: originalFileName,
+        mime_type: mimeType,
+        file_size_bytes: file.size,
+        timestamp_or_range: readOptionalText(formData, "timestampOrRange", 100),
+        score_context: readOptionalText(formData, "scoreContext", 200),
+        pressure_trigger: readPressureTrigger(formData),
+        player_point_outcome: readPlayerPointOutcome(formData),
+        coach_note: readOptionalText(formData, "coachNote", 5000),
         upload_status: "ready",
+        analysis_status: "not_started",
+        review_status: "unreviewed",
       });
 
-      return NextResponse.json({ clip: readyClip }, { status: 201 });
-    } catch (error) {
+      return NextResponse.json(
+        {
+          clip: {
+            id: readyClip.id,
+            title: readyClip.title,
+            originalFileName: readyClip.original_file_name,
+            fileSizeBytes: readyClip.file_size_bytes,
+            uploadStatus: readyClip.upload_status,
+          },
+        },
+        { status: 201 },
+      );
+    } catch {
       try {
-        await markUploadFailed(supabase, clip.id);
-      } catch (statusError) {
-        throw new AggregateError(
-          [error, statusError],
-          "Clip upload failed and its failure status could not be saved.",
+        await removePrivateClip(supabase, storagePath);
+      } catch {
+        throw new ClipStorageError(
+          "The clip metadata could not be saved, and the uploaded video could not be removed. Contact support before retrying.",
         );
       }
-      throw error;
+
+      throw new ClipStorageError(
+        "The clip metadata could not be saved. The uploaded video was removed; try again.",
+      );
     }
   } catch (error) {
     return uploadErrorResponse(error);
+  }
+}
+
+function assertSameOrigin(request: Request): void {
+  const origin = request.headers.get("origin");
+  if (origin && origin !== new URL(request.url).origin) {
+    throw new ClipStorageError("Cross-origin clip uploads are not allowed.", 403);
+  }
+}
+
+function assertRequestSize(request: Request): void {
+  const contentLength = request.headers.get("content-length");
+  if (!contentLength) return;
+
+  const bytes = Number(contentLength);
+  if (
+    !Number.isFinite(bytes) ||
+    bytes <= 0 ||
+    bytes > MAX_CLIP_FILE_BYTES + MAX_MULTIPART_OVERHEAD_BYTES
+  ) {
+    throw new ClipStorageError("The upload request exceeds 100 MB.", 413);
   }
 }
 
@@ -108,11 +159,14 @@ async function readFormData(request: Request): Promise<FormData> {
 }
 
 function requireFile(formData: FormData, key: string): File {
-  const value = formData.get(key);
-  if (!(value instanceof File)) {
-    throw new ClipStorageError(`Missing ${key} file.`, 400);
+  const uploadedFiles = Array.from(formData.entries()).filter(
+    (entry): entry is [string, File] => entry[1] instanceof File,
+  );
+
+  if (uploadedFiles.length !== 1 || uploadedFiles[0][0] !== key) {
+    throw new ClipStorageError("Upload exactly one video file.", 400);
   }
-  return value;
+  return uploadedFiles[0][1];
 }
 
 function requireUuid(formData: FormData, key: string): string {
@@ -172,16 +226,6 @@ function readPressureTrigger(formData: FormData): PressureTrigger | null {
     throw new ClipStorageError("pressureTrigger is invalid.", 400);
   }
   return value as PressureTrigger;
-}
-
-async function markUploadFailed(
-  supabase: Parameters<typeof updateClip>[0],
-  clipId: string,
-): Promise<void> {
-  await updateClip(supabase, clipId, {
-    upload_error: "Private Storage upload did not complete.",
-    upload_status: "failed",
-  });
 }
 
 function uploadErrorResponse(error: unknown) {

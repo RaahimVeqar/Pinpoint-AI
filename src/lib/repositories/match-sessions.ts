@@ -60,14 +60,17 @@ const MATCH_SESSION_COLUMNS =
 
 export async function listMatchSessions(
   supabase: SupabaseClient,
-  playerId: string,
+  playerId?: string,
 ): Promise<MatchSessionRow[]> {
-  const { data, error } = await supabase
+  let query = supabase
     .from("match_sessions")
     .select(MATCH_SESSION_COLUMNS)
-    .eq("player_id", playerId)
     .order("session_date", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
+
+  if (playerId) query = query.eq("player_id", playerId);
+
+  const { data, error } = await query;
 
   return requireRepositoryData(
     data as unknown as MatchSessionRow[] | null,

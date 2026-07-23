@@ -23,7 +23,9 @@ export class ClipStorageError extends Error {
   }
 }
 
-export function validatePrivateClip(file: File): AllowedClipMimeType {
+export async function validatePrivateClip(
+  file: File,
+): Promise<AllowedClipMimeType> {
   if (file.size <= 0) {
     throw new ClipStorageError("The uploaded video is empty.", 400);
   }
@@ -36,15 +38,34 @@ export function validatePrivateClip(file: File): AllowedClipMimeType {
     throw new ClipStorageError("The uploaded file type is not supported.", 415);
   }
 
+  const header = new Uint8Array(await file.slice(0, 32).arrayBuffer());
+  if (!hasExpectedVideoSignature(file.type, header)) {
+    throw new ClipStorageError(
+      "The file contents do not match a supported video format.",
+      415,
+    );
+  }
+
   return file.type;
 }
 
 export function createPrivateClipPath(
   authenticatedUserId: string,
+  matchSessionId: string,
   originalFileName: string,
 ): string {
-  const safeName = sanitizeFileName(originalFileName);
-  return `${authenticatedUserId}/${crypto.randomUUID()}-${safeName}`;
+  const safeName = sanitizeClipFileName(originalFileName);
+  return `${authenticatedUserId}/${matchSessionId}/${crypto.randomUUID()}-${safeName}`;
+}
+
+export function sanitizeClipFileName(value: string): string {
+  const sanitized = value
+    .normalize("NFKC")
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120);
+
+  return sanitized || "clip";
 }
 
 export async function uploadPrivateClip(
@@ -52,15 +73,29 @@ export async function uploadPrivateClip(
   storagePath: string,
   file: File,
 ): Promise<void> {
+  const contentType = await validatePrivateClip(file);
   const { error } = await supabase.storage
     .from(PLAYER_CLIPS_BUCKET)
     .upload(storagePath, file, {
       cacheControl: "3600",
-      contentType: validatePrivateClip(file),
+      contentType,
       upsert: false,
     });
 
   if (error) throw new ClipStorageError("Private clip upload failed.");
+}
+
+export async function removePrivateClip(
+  supabase: SupabaseClient,
+  storagePath: string,
+): Promise<void> {
+  const { error } = await supabase.storage
+    .from(PLAYER_CLIPS_BUCKET)
+    .remove([storagePath]);
+
+  if (error) {
+    throw new ClipStorageError("Unable to remove an incomplete private clip.");
+  }
 }
 
 export async function createSignedClipPlaybackUrl(
@@ -94,12 +129,25 @@ function isAllowedClipMimeType(value: string): value is AllowedClipMimeType {
   return (ALLOWED_CLIP_MIME_TYPES as readonly string[]).includes(value);
 }
 
-function sanitizeFileName(value: string): string {
-  const sanitized = value
-    .normalize("NFKC")
-    .replace(/[^a-zA-Z0-9._-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 120);
+function hasExpectedVideoSignature(
+  mimeType: AllowedClipMimeType,
+  header: Uint8Array,
+): boolean {
+  if (mimeType === "video/webm") {
+    return (
+      header.length >= 4 &&
+      header[0] === 0x1a &&
+      header[1] === 0x45 &&
+      header[2] === 0xdf &&
+      header[3] === 0xa3
+    );
+  }
 
-  return sanitized || "clip";
+  return (
+    header.length >= 12 &&
+    header[4] === 0x66 &&
+    header[5] === 0x74 &&
+    header[6] === 0x79 &&
+    header[7] === 0x70
+  );
 }

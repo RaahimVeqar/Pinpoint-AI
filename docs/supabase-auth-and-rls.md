@@ -1,6 +1,6 @@
 # Supabase Authentication and Player Workflow RLS
 
-> **Review gate:** Neither migration is applied by the application. Review migrations 002 and 003 before applying them manually. Do not create or apply database or Storage policies merely to bypass an authorization error.
+> **Current state:** Migrations 002 and 003 have been applied and tested. Migration 004 is prepared but has not been applied. The application never applies migrations; do not apply Storage policies merely to bypass an authorization error.
 
 ## Authentication configuration
 
@@ -50,6 +50,7 @@ The proxy requires authentication for these route prefixes:
 
 - `/players`
 - `/matches` (including `/matches/[clipId]` when that route exists)
+- `/clips` (including the real upload workflow at `/clips/upload`)
 - `/tagging`
 - `/reports`
 - `/dashboard`
@@ -85,14 +86,16 @@ RLS remains the final enforcement boundary. A caller cannot bypass ownership che
 
 ## Migration order
 
-After both files have been reviewed, apply them manually and in order through the team migration workflow or Supabase SQL Editor:
+The table migrations were applied manually in this order:
 
 1. `supabase/migrations/002_create_player_clip_workflow.sql`
 2. `supabase/migrations/003_add_player_workflow_rls_policies.sql`
 
-Migration 002 creates the six tables, enables RLS, revokes anonymous access, and deliberately creates no policies. Migration 003 adds the policies below. Applying 003 before 002 will fail because its target tables do not exist.
+Migration 002 creates the six tables, enables RLS, revokes anonymous access, and deliberately creates no policies. Migration 003 adds the policies below.
 
-**Do not apply either migration until the schema, deletion behavior, grants, and every policy have been reviewed.**
+Migration 004 is the next review gate and remains unapplied:
+
+3. `supabase/migrations/004_create_private_player_clip_storage.sql`
 
 ## Policies added by migration 003
 
@@ -164,8 +167,8 @@ Never test cross-user isolation with a service-role client: service-role access 
 7. Try a protected page again and confirm it redirects to sign-in.
 8. Confirm `/` and `/elite-library` remain available while signed out.
 
-## Next security step: private clip Storage
+## Next security step: apply reviewed migration 004
 
-The `player-clips` bucket still needs to be created manually and must remain private. This migration does **not** add `storage.objects` policies. Until reviewed Storage policies exist, clip object uploads and signed playback should remain blocked even after table RLS is enabled.
+Migration 004 creates the private `player-clips` bucket with a 100 MB limit and an allowlist for MP4, MOV, and WebM. Objects use `<authenticated-user-id>/<match-session-id>/<unique-file-name>`. INSERT requires the authenticated Storage owner, user prefix, and an owned match-session folder. SELECT is operation-scoped: upload metadata may be returned for that owned session, while signing a playback URL additionally requires an exact RLS-visible `clips` row. DELETE is owner- and prefix-scoped so failed database persistence can be compensated safely.
 
-The next migration should scope Storage access to the authenticated user's object prefix and verify the related `clips` row where appropriate. Do not expose private paths through public URLs, do not call `getPublicUrl`, and do not make the bucket public.
+Until migration 004 is reviewed and applied, object upload and signed playback remain blocked. Do not expose private paths through public URLs, call `getPublicUrl`, or make the bucket public.

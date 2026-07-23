@@ -24,7 +24,7 @@ Never commit API keys, Supabase credentials, OpenAI keys, or player footage cred
 
 The current app uses the local JSON elite pressure-point dataset. The next backend phase is Supabase, with `elite_pressure_points` as the first database table because it maps directly to the reviewed local dataset and powers the Elite Library.
 
-Player clips should later use private storage, and video files must not be committed to GitHub. OpenAI integration should come after the database and storage structure is ready so generated analysis can reference saved clips and Elite Library evidence cleanly.
+Player clips use an authenticated upload workflow at `/clips/upload`. The reviewed-but-unapplied migration `004_create_private_player_clip_storage.sql` creates the private bucket and ownership-scoped object policies; uploads remain blocked until that migration is applied manually. Video files must never be committed to GitHub.
 
 ## Elite Pressure-Point Dataset
 

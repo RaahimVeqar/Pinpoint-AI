@@ -9,6 +9,7 @@ const primaryItems = [
   { href: "/", label: "Home" },
   { href: "/players", label: "Players" },
   { href: "/matches", label: "Matches" },
+  { href: "/clips/upload", label: "Upload Clip" },
   { href: "/tagging", label: "Analyze Clip" },
   { href: "/elite-library", label: "Elite Library" },
   { href: "/reports", label: "Reports" },

@@ -13,10 +13,21 @@ import {
 
 type RouteContext = { params: Promise<{ clipId: string }> };
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export async function GET(_request: Request, context: RouteContext) {
   try {
     const { supabase } = await requireAuthenticatedSupabaseClient();
     const { clipId } = await context.params;
+
+    if (!UUID_PATTERN.test(clipId)) {
+      return NextResponse.json(
+        { error: "clipId must be a UUID." },
+        { status: 400 },
+      );
+    }
+
     const clip = await getClipById(supabase, clipId);
 
     if (!clip) {
